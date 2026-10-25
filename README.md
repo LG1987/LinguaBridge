@@ -131,12 +131,13 @@ pwsh -File scripts\package.ps1 -Version 0.1.1  # 改版本号后重新打包
 pwsh -File scripts\package.ps1 -SkipBuild      # 复用当前 dist
 ```
 
-产物在 `release/`：
+产物在 `release/`（**已入库**，可直接下载，无需先构建）：
 
 | 文件 | 内容 |
 |------|------|
 | `LinguaBridge-<version>.zip` | 可「加载解压缩的扩展」的目录结构（顶层 `LinguaBridge-<version>/`，已排除 sourcemap） |
 | `LinguaBridge-<version>.json` | 构建时间、逐文件大小与 SHA-256、整包 SHA-256、加载说明 |
+| [`README.md`](release/README.md) | 软件包说明：包含哪些文件、每个文件的作用、完整功能列表、安装与校验 |
 
 打包脚本会在以下情况**拒绝出包**：manifest 版本与 `package.json` 不一致、manifest 引用的 bundle 缺失、压缩包里混入 `.ts`/`.map`/测试文件。已实测校验：3 个文件、82 KB、逐文件哈希与元数据一致。
 

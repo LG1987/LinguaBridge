@@ -60,7 +60,7 @@ if (-not (Test-Path $python) -or $Force) {
 }
 
 Step "安装本地翻译引擎依赖"
-& $uv pip install --python $python ctranslate2 sentencepiece
+& $uv pip install --python $python -r (Join-Path $root 'service\requirements.txt')
 
 if (-not $SkipModels) {
     Step "下载 Argos 中英模型"

@@ -1,7 +1,10 @@
 # build output
 dist/
-release/
 .artifacts/
+
+# release/ is intentionally TRACKED: it ships the load-unpacked zip and its
+# checksum metadata so the package can be downloaded without building.
+# Regenerate with: pwsh -File scripts\package.ps1
 
 # toolchains / caches kept inside the project
 .venv/

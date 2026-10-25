@@ -1,0 +1,8 @@
+# Runtime dependencies of the local engine (service/server.py).
+#
+# Deliberately minimal: the same Argos models that LibreTranslate uses, but
+# without torch/stanza — see docs/architecture.md.
+#
+# Versions pinned to what v0.1.0 was verified against (Python 3.12, win_amd64).
+ctranslate2==4.8.3
+sentencepiece==0.2.2
