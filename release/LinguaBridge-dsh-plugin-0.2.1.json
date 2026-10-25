@@ -3,12 +3,12 @@
   "component": "dsh-plugin",
   "version": "0.2.1",
   "kind": "dsh-cordis-bundle",
-  "builtAt": "2026-10-25T11:24:12.3318148-06:00",
+  "builtAt": "2026-10-25T11:30:25.7881758-06:00",
   "files": [
     {
       "path": "client.js",
-      "bytes": 17443,
-      "sha256": "135d9e7aaa713f18bdda47aebbeb3775c9cb9657f4658146f42ac080194da0b5"
+      "bytes": 18112,
+      "sha256": "13cd5ad166bc8035fffa9497fc91a5cac37f78733b247beeddb64384ef536435"
     },
     {
       "path": "cordis.patch.yml",
@@ -41,8 +41,8 @@
       "sha256": "3343c3f640bcf7a0ef7f681bdecc32153c080ab2b7844a8f5673216af5f39b30"
     }
   ],
-  "totalBytes": 19548,
-  "archiveBytes": 9392,
-  "archiveSha256": "028374adb01b16a4d1a7ec6a78b6ace2b005e966ee16063aee812139d2948fa3",
+  "totalBytes": 20217,
+  "archiveBytes": 9647,
+  "archiveSha256": "f49e4b3e4c330a766a675243100caf70ee55c838b588484cba1d9ca35941bc77",
   "installTarget": "解压后把 LinguaBridge-dsh-plugin-0.2.1 目录作为 plugin_manager install_bundle 的 target"
 }

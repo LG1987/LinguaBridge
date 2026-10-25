@@ -216,40 +216,47 @@ describe("dsh plugin · 译并发送", () => {
 
     (button?.props["onClick"] as () => void)();
 
-    // The loader is always mounted and parked at the leftmost safe spot while idle.
+    // Idle: the loader already sits beside the button and keeps turning.
     const idleLoader = findByClass(tree, "lb-loader-inline");
     assert.ok(idleLoader !== null, "the loader must always be rendered, not only while busy");
     assert.ok(
       !String(idleLoader?.props["className"]).includes("paused"),
       "the animation must keep running regardless of position",
     );
-    assert.ok(
-      String((idleLoader?.props["style"] as Record<string, unknown>)["transform"]).startsWith("translateX(-"),
-      "the idle loader must be parked to the left",
+    assert.equal(
+      (idleLoader?.props["style"] as Record<string, unknown>)["transform"],
+      "translateX(0px)",
+      "the idle loader must sit beside the button",
     );
 
     (button?.props["onClick"] as () => void)();
 
-    // Busy: same row, left of the button, animation running, moved next to it.
-    const busyTree = harness.render(draftState, actions);
-    const busyLoader = findByClass(busyTree, "lb-loader-inline");
-    assert.ok(busyLoader !== null, "the inline loader must be present while translating");
-    assert.equal(
-      (busyLoader?.props["style"] as Record<string, unknown>)["transform"],
-      "translateX(0px)",
-      "the busy loader must sit next to the button",
-    );
-    assert.ok(findByClass(busyTree, "lb-loader") !== null, "the animation element must be rendered");
+    // Right after the click it jumps to the far left with transition disabled.
+    const jumpTree = harness.render(draftState, actions);
+    const jumpLoader = findByClass(jumpTree, "lb-loader-inline");
+    assert.ok(jumpLoader !== null, "the loader must still be mounted after the click");
+    const jumpStyle = jumpLoader?.props["style"] as Record<string, unknown>;
+    assert.ok(String(jumpStyle["transform"]).startsWith("translateX(-"), "the loader must jump to the far left");
+    assert.equal(jumpStyle["transition"], "none", "the jump must be instant, not animated");
+
+    // One frame later it travels right under the 6s transition.
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    const movingTree = harness.render(draftState, actions);
+    const movingLoader = findByClass(movingTree, "lb-loader-inline");
+    const movingStyle = movingLoader?.props["style"] as Record<string, unknown>;
+    assert.equal(movingStyle["transform"], "translateX(0px)", "the loader must travel back to the button");
+    assert.equal(movingStyle["transition"], undefined, "the travel must use the stylesheet transition");
+    assert.ok(findByClass(movingTree, "lb-loader") !== null, "the animation element must be rendered");
 
     const asElement = (value: unknown): Element | null =>
       value !== null && typeof value === "object" && "type" in (value as object) ? (value as Element) : null;
-    const row = (busyTree.props["children"] ?? []) as unknown[];
+    const row = (movingTree.props["children"] ?? []) as unknown[];
     const loaderIndex = row.findIndex((child) => asElement(child)?.props["className"] === "lb-loader-track");
     const buttonIndex = row.findIndex((child) => asElement(child)?.type === "button");
     assert.ok(loaderIndex >= 0 && buttonIndex >= 0, "both the loader and the button must be in the row");
     assert.ok(loaderIndex < buttonIndex, "the loader must render to the left of the button");
 
-    const styleElement = findByType(busyTree, "style");
+    const styleElement = findByType(movingTree, "style");
     assert.ok(styleElement !== null, "the loader stylesheet must be inlined");
     const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
     assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");

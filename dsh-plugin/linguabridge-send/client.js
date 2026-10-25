@@ -288,6 +288,8 @@ window.__ModuleLoader__.load({
       const input = props.useInput((state) => state);
       const actions = props.inputActions;
       const [status, setStatus] = React.useState({ busy: false, error: null, done: false });
+      // 点击瞬间跳到最左：此时关闭 transition，直接落位，再由下一帧开启 6s 匀速右移。
+      const [jumpLeft, setJumpLeft] = React.useState(false);
       // 空闲位置：默认左移 72px；挂载后实测到"输入卡片左侧、第一个控件之后"，
       // 也就是工具行最左侧仍不覆盖其它元素的位置。
       const [travel, setTravel] = React.useState(72);
@@ -332,12 +334,21 @@ window.__ModuleLoader__.load({
           setStatus({ busy: false, error: '读不到输入框内容，请刷新页面（Ctrl+R）后重试', done: false });
           return;
         }
+
         setStatus({ busy: true, error: null, done: false });
-        translateDraft(draft)
-          .then(async (english) => {
+        setJumpLeft(true); // 点击后立刻出现在最左（[+] 旁边）
+
+        void (async () => {
+          try {
+            // 先把"在最左"画出来，否则 transition 从 0 出发、看起来没有移动
+            await new Promise((resolve) => setTimeout(resolve, 30));
+            setJumpLeft(false); // 打开 6s 匀速，向右滑回按钮旁
+
+            const english = await translateDraft(draft);
             if (english.trim() === '') throw new Error('译文为空，未发送');
             actions.setDraft(english);
             if (typeof actions.persistDraft === 'function') actions.persistDraft();
+
             // Lexical 的投影在下一帧才发布：等草稿真的变成英文再提交，
             // 否则会把旧的中文草稿发出去。
             const deadline = Date.now() + 1500;
@@ -346,20 +357,23 @@ window.__ModuleLoader__.load({
               if (latestDraft.current.trim() === english.trim()) break;
             }
             actions.submit();
+
             const elapsed = Date.now() - startedAt;
             if (elapsed < MIN_LOADER_MS) {
               await new Promise((resolve) => setTimeout(resolve, MIN_LOADER_MS - elapsed));
             }
             setStatus({ busy: false, error: null, done: true });
             setTimeout(() => setStatus({ busy: false, error: null, done: false }), 1600);
-          })
-          .catch((error) => {
+          } catch (error) {
             setStatus({
               busy: false,
               error: (error !== null && typeof error === 'object' && error.message) || String(error),
               done: false,
             });
-          });
+          } finally {
+            setJumpLeft(false);
+          }
+        })();
       }, [actions, input, status.busy]);
 
       const label = status.busy ? '译…' : status.done ? '已发送' : '译';
@@ -376,8 +390,10 @@ window.__ModuleLoader__.load({
           'span',
           {
             className: 'lb-loader-inline',
-            // 空闲停最左，点击后用 6s 匀速滑到按钮旁；动画始终在跑
-            style: { transform: `translateX(${status.busy ? 0 : -travel}px)` },
+            // 平时就在按钮旁；点击后瞬间落到最左，再用 6s 匀速滑回来
+            style: jumpLeft
+              ? { transform: `translateX(${-travel}px)`, transition: 'none' }
+              : { transform: 'translateX(0px)' },
           },
           h('span', { className: 'lb-loader', 'aria-hidden': 'true' }),
         ),
