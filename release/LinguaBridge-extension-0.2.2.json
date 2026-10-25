@@ -1,0 +1,28 @@
+{
+  "name": "LinguaBridge",
+  "component": "extension",
+  "version": "0.2.2",
+  "kind": "chrome-mv3-unpacked",
+  "builtAt": "2026-10-25T11:43:21.4290606-06:00",
+  "files": [
+    {
+      "path": "background.js",
+      "bytes": 33191,
+      "sha256": "6b1aa8148cff569605c2987c5bd90ba4a1ff9a793c4e0bcf1b79584f1eb66ccd"
+    },
+    {
+      "path": "content.js",
+      "bytes": 49334,
+      "sha256": "b6d83df8c66ebb8d287af5f6f5d3b99f3fc15ad35dc18c4b5fe30951dc3e6758"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 1221,
+      "sha256": "78e10f0941a65a8bfa98c8091a076ccc8b767e09d70417ddf3558a4523c95339"
+    }
+  ],
+  "totalBytes": 83746,
+  "archiveBytes": 24641,
+  "archiveSha256": "1161929a86a37f9cb879b17c165ca56defb0752eef2b35f3c26df27f5ae5fca7",
+  "loadUnpacked": "解压后选择 LinguaBridge-extension-0.2.2 目录（其中应包含 manifest.json）"
+}

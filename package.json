@@ -1,7 +1,7 @@
 {
   "name": "linguabridge",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "LinguaBridge — local-first bilingual prompt layer for AI chat UIs (DSH first, ChatGPT next).",
   "scripts": {

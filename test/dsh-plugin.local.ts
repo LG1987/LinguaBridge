@@ -29,6 +29,8 @@ interface Harness {
   render: (draft: string, actions: Record<string, unknown>) => Element;
   /** Point the plugin at another engine base URL. */
   setEndpoint: (value: string | null) => void;
+  /** Fire a synthetic keydown at the most recently registered listener. */
+  dispatchKeyDown: (event: Record<string, unknown>) => void;
 }
 
 function findButton(element: Element): Element | null {
@@ -106,6 +108,20 @@ async function createHarness(): Promise<Harness> {
     useEffect: (fn: unknown) => {
       const index = cursor++;
       hooks[index] = fn;
+      // Run the effect immediately: the tests only need the listener it registers.
+      (fn as () => void)();
+    },
+  };
+
+  const keyDownListeners: Array<(event: unknown) => void> = [];
+  const documentStub = {
+    addEventListener: (type: string, fn: (event: unknown) => void) => {
+      if (type === "keydown") keyDownListeners.push(fn);
+    },
+    removeEventListener: (type: string, fn: (event: unknown) => void) => {
+      if (type !== "keydown") return;
+      const index = keyDownListeners.indexOf(fn);
+      if (index >= 0) keyDownListeners.splice(index, 1);
     },
   };
 
@@ -126,6 +142,7 @@ async function createHarness(): Promise<Harness> {
   // eslint-disable-next-line no-new-func
   const evaluate = new Function(
     "window",
+    "document",
     "require",
     "fetch",
     "setTimeout",
@@ -133,7 +150,7 @@ async function createHarness(): Promise<Harness> {
     "AbortController",
     source,
   );
-  evaluate(windowStub, requireStub, globalThis.fetch, setTimeout, clearTimeout, AbortController);
+  evaluate(windowStub, documentStub, requireStub, globalThis.fetch, setTimeout, clearTimeout, AbortController);
 
   assert.ok(definition !== null, "client.js must register a module factory");
   const module = (definition as { factory: (r: (id: string) => unknown) => Record<string, unknown> }).factory(
@@ -159,6 +176,10 @@ async function createHarness(): Promise<Harness> {
     },
     setEndpoint(value) {
       endpointOverride = value;
+    },
+    dispatchKeyDown(event) {
+      const listener = keyDownListeners[keyDownListeners.length - 1];
+      if (listener !== undefined) listener(event);
     },
   };
 }
@@ -320,5 +341,85 @@ describe("dsh plugin · 译并发送", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 300));
     assert.equal(submitted, false);
+  });
+
+  it("translates and sends when Enter is pressed inside the composer", async (t) => {
+    if (!(await engineUp())) {
+      t.skip(`no engine on ${ENDPOINT}`);
+      return;
+    }
+
+    const harness = await createHarness();
+    let submitted = false;
+    let written = "";
+    let prevented = false;
+    let stopped = false;
+
+    const actions: Record<string, unknown> = {
+      setDraft: (text: string) => {
+        written = text;
+      },
+      persistDraft: () => {},
+      submit: () => {
+        submitted = true;
+      },
+    };
+
+    harness.render("帮我总结一下这段话，并给出三个要点。", actions);
+    harness.dispatchKeyDown({
+      key: "Enter",
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+      isComposing: false,
+      keyCode: 13,
+      target: { closest: (selector: string) => (selector === '[data-lexical-editor="true"]' ? {} : null) },
+      preventDefault: () => {
+        prevented = true;
+      },
+      stopPropagation: () => {
+        stopped = true;
+      },
+    });
+
+    assert.equal(prevented, true, "Enter must be intercepted so the native send does not fire");
+    assert.equal(stopped, true, "the site handler must not also receive the Enter");
+
+    const deadline = Date.now() + 30_000;
+    while (!submitted && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    assert.equal(submitted, true, "Enter must submit after translating");
+    assert.ok(/[A-Za-z]/.test(written), "the written draft must be English");
+    assert.ok(!/[\u4e00-\u9fff]/.test(written), `Chinese left in the draft: ${written}`);
+  });
+
+  it("leaves an English Enter to the native send", async () => {
+    const harness = await createHarness();
+    let prevented = false;
+    const actions: Record<string, unknown> = {
+      setDraft: () => {},
+      persistDraft: () => {},
+      submit: () => {},
+    };
+
+    harness.render("Test", actions);
+    harness.dispatchKeyDown({
+      key: "Enter",
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+      isComposing: false,
+      keyCode: 13,
+      target: { closest: () => ({}) },
+      preventDefault: () => {
+        prevented = true;
+      },
+      stopPropagation: () => {},
+    });
+
+    assert.equal(prevented, false, "an English draft must keep the native Enter behaviour");
   });
 });

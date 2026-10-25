@@ -1,6 +1,6 @@
 {
   "name": "@local/linguabridge-send",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "description": "Translate the composer draft into English and send it in one click, using the local LinguaBridge engine.",
