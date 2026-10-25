@@ -343,83 +343,10 @@ describe("dsh plugin · 译并发送", () => {
     assert.equal(submitted, false);
   });
 
-  it("translates and sends when Enter is pressed inside the composer", async (t) => {
-    if (!(await engineUp())) {
-      t.skip(`no engine on ${ENDPOINT}`);
-      return;
-    }
-
-    const harness = await createHarness();
-    let submitted = false;
-    let written = "";
-    let prevented = false;
-    let stopped = false;
-
-    const actions: Record<string, unknown> = {
-      setDraft: (text: string) => {
-        written = text;
-      },
-      persistDraft: () => {},
-      submit: () => {
-        submitted = true;
-      },
-    };
-
-    harness.render("帮我总结一下这段话，并给出三个要点。", actions);
-    harness.dispatchKeyDown({
-      key: "Enter",
-      shiftKey: false,
-      ctrlKey: false,
-      altKey: false,
-      metaKey: false,
-      isComposing: false,
-      keyCode: 13,
-      target: { closest: (selector: string) => (selector === '[data-lexical-editor="true"]' ? {} : null) },
-      preventDefault: () => {
-        prevented = true;
-      },
-      stopPropagation: () => {
-        stopped = true;
-      },
-    });
-
-    assert.equal(prevented, true, "Enter must be intercepted so the native send does not fire");
-    assert.equal(stopped, true, "the site handler must not also receive the Enter");
-
-    const deadline = Date.now() + 30_000;
-    while (!submitted && Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    assert.equal(submitted, true, "Enter must submit after translating");
-    assert.ok(/[A-Za-z]/.test(written), "the written draft must be English");
-    assert.ok(!/[\u4e00-\u9fff]/.test(written), `Chinese left in the draft: ${written}`);
-  });
-
-  it("leaves an English Enter to the native send", async () => {
-    const harness = await createHarness();
-    let prevented = false;
-    const actions: Record<string, unknown> = {
-      setDraft: () => {},
-      persistDraft: () => {},
-      submit: () => {},
-    };
-
-    harness.render("Test", actions);
-    harness.dispatchKeyDown({
-      key: "Enter",
-      shiftKey: false,
-      ctrlKey: false,
-      altKey: false,
-      metaKey: false,
-      isComposing: false,
-      keyCode: 13,
-      target: { closest: () => ({}) },
-      preventDefault: () => {
-        prevented = true;
-      },
-      stopPropagation: () => {},
-    });
-
-    assert.equal(prevented, false, "an English draft must keep the native Enter behaviour");
+  it("only the button triggers translation — Enter is never intercepted", async () => {
+    const source = await readFile(CLIENT_FILE, "utf8");
+    assert.ok(!source.includes("keydown"), "the plugin must not listen for keydown");
+    assert.ok(!source.includes("'Enter'"), "Enter must stay entirely native");
+    assert.ok(!source.includes("isComposing"), "no composition-aware key handling should exist");
   });
 });

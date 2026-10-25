@@ -344,7 +344,7 @@ window.__ModuleLoader__.load({
       const latestDraft = React.useRef('');
       latestDraft.current = readDraft(input);
 
-      const startSend = React.useCallback(() => {
+      const onClick = React.useCallback(() => {
         if (status.busy) return;
         const startedAt = Date.now();
         const draft = readDraft(input);
@@ -387,33 +387,7 @@ window.__ModuleLoader__.load({
         })();
       }, [actions, input, status.busy]);
 
-      /**
-       * 回车也要能翻译：在 composer 里按 Enter（无修饰键、非输入法组合期）时，
-       * 程序化走同一条"翻译→写回→提交"链路，并阻止站点的原生发送。
-       * 英文草稿、以 / 开头的命令、以及输入法组合中的 Enter 一律放行给原生行为。
-       */
-      React.useEffect(() => {
-        const onKeyDown = (event) => {
-          if (event.key !== 'Enter' || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
-          if (event.isComposing || event.keyCode === 229) return;
-          const target = event.target;
-          if (target === null || typeof target !== 'object' || typeof target.closest !== 'function') return;
-          if (target.closest('[data-lexical-editor="true"]') === null) return;
-
-          const draft = latestDraft.current;
-          if (!/[\u3400-\u4dbf\u4e00-\u9fff]/.test(draft)) return; // 英文交给原生
-          if (draft.trimStart().startsWith('/')) return; // 斜杠命令交给原生
-
-          event.preventDefault();
-          event.stopPropagation();
-          startSend();
-        };
-
-        document.addEventListener('keydown', onKeyDown, true);
-        return () => document.removeEventListener('keydown', onKeyDown, true);
-      }, [startSend]);
-
-      const onClick = startSend;
+      // 只有这个按钮会触发翻译发送：回车等原生发送路径一律不接管。
 
       const label = status.busy ? '译…' : status.done ? '已发送' : '译';
 

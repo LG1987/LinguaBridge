@@ -16,15 +16,17 @@ LinguaBridge-<component>-<version>.json   # 同名元数据：逐文件/整包 S
 
 > v0.1.0 的历史产物保留原名 `LinguaBridge-0.1.0.zip`，对应 tag `v0.1.0`，未重命名。
 
-## 当前产物（v0.2.2）
+## 当前产物（v0.2.3）
 
 | 文件 | 大小 | SHA-256 | 内容 |
 |------|------|---------|------|
-| `LinguaBridge-extension-0.2.2.zip` | 24 KB | `1161929a…fca7` | 扩展：`manifest.json` + `background.js` + `content.js`（已排除 sourcemap） |
-| `LinguaBridge-dsh-plugin-0.2.2.zip` | 10.2 KB | `42e2c830…4419` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
+| `LinguaBridge-extension-0.2.3.zip` | 24 KB | `23ec8706…8a55` | 扩展：`manifest.json` + `background.js` + `content.js`（已排除 sourcemap） |
+| `LinguaBridge-dsh-plugin-0.2.3.zip` | 9.7 KB | `a1b570d1…8c39` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
 | 同名 `.json` | — | — | 构建时间、逐文件与整包 SHA-256、安装说明 |
 
-上一版仍保留：`LinguaBridge-extension-0.2.1.zip`、`LinguaBridge-dsh-plugin-0.2.1.zip`、`...-0.2.0.*`。
+> v0.2.3 撤销了 v0.2.2 的 Enter 接管：**只有「译」按钮可触发**。
+
+上一版仍保留：`LinguaBridge-*-0.2.2.zip`、`-0.2.1.zip`、`-0.2.0.zip`。
 首版：`LinguaBridge-0.1.0.zip`（tag `v0.1.0` 指向它，未重命名）。
 
 整包哈希以各自 `.json` 的 `archiveSha256` 为准；重新打包会更新。
