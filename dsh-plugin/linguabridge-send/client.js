@@ -20,6 +20,8 @@ window.__ModuleLoader__.load({
 
     const DEFAULT_ENDPOINT = 'http://127.0.0.1:5000';
     const TIMEOUT_MS = 20000;
+    // 本机翻译常常只要 300–600 ms，动画会一闪而过；给忙碌态一个最短可见时长。
+    const MIN_LOADER_MS = 700;
 
     // ---------------------------------------------------------------- 格式保护
 
@@ -295,6 +297,7 @@ window.__ModuleLoader__.load({
 
       const onClick = React.useCallback(() => {
         if (status.busy) return;
+        const startedAt = Date.now();
         const draft = readDraft(input);
         if (draft.trim() === '') {
           setStatus({ busy: false, error: '读不到输入框内容，请刷新页面（Ctrl+R）后重试', done: false });
@@ -314,6 +317,10 @@ window.__ModuleLoader__.load({
               if (latestDraft.current.trim() === english.trim()) break;
             }
             actions.submit();
+            const elapsed = Date.now() - startedAt;
+            if (elapsed < MIN_LOADER_MS) {
+              await new Promise((resolve) => setTimeout(resolve, MIN_LOADER_MS - elapsed));
+            }
             setStatus({ busy: false, error: null, done: true });
             setTimeout(() => setStatus({ busy: false, error: null, done: false }), 1600);
           })
