@@ -231,6 +231,8 @@ describe("dsh plugin · 译并发送", () => {
     const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
     assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");
     assert.ok(!css.includes("position: fixed"), "the loader must be inline, not a floating overlay");
+    assert.ok(css.includes("lb-loader 1s 3"), "the animation must run three 1s cycles, not loop forever");
+    assert.ok(!css.includes("infinite"), "the animation must stop after three turns");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {
