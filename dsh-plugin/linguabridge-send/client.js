@@ -217,6 +217,58 @@ window.__ModuleLoader__.load({
 
     // ---------------------------------------------------------------- UI
 
+    // 来自 release/动画.txt：两个黄色方块在 100×100 网格里循环位移，
+    // 父级用 blur(5px) contrast(10) 把两块"粘"在一起，再 hue-rotate 上色。
+    // 外层 .lb-loader-box 提供白色底，避免 mix-blend-mode:darken 在深色主题下变黑。
+    const LOADER_CSS = `
+      .lb-loader {
+        width: 100px; aspect-ratio: 1; padding: 10px; box-sizing: border-box;
+        display: grid; background: #fff;
+        filter: blur(5px) contrast(10) hue-rotate(300deg);
+        mix-blend-mode: darken;
+      }
+      .lb-loader:before, .lb-loader:after {
+        content: ""; grid-area: 1/1; width: 40px; height: 40px;
+        background: #ffff00; animation: lb-loader 2s infinite;
+      }
+      .lb-loader:after { animation-delay: -1s; }
+      @keyframes lb-loader {
+        0%   { transform: translate(0, 0); }
+        25%  { transform: translate(100%, 0); }
+        50%  { transform: translate(100%, 100%); }
+        75%  { transform: translate(0, 100%); }
+        100% { transform: translate(0, 0); }
+      }
+      .lb-loader-chip {
+        position: fixed; left: 50%; bottom: 128px; transform: translateX(-50%);
+        display: flex; align-items: center; gap: 10px;
+        padding: 6px 14px 6px 6px; border-radius: 12px;
+        background: rgba(20, 22, 28, 0.94); color: #e6e8ee;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        font-size: 12px; line-height: 1; letter-spacing: 0.02em;
+        z-index: 2147483000; pointer-events: none; user-select: none;
+      }
+      .lb-loader-box {
+        width: 44px; height: 44px; flex: none; position: relative;
+        overflow: hidden; border-radius: 7px; background: #fff;
+      }
+      .lb-loader-box .lb-loader {
+        position: absolute; left: 50%; top: 50%;
+        transform: translate(-50%, -50%) scale(0.42); transform-origin: center;
+      }
+      @media (prefers-color-scheme: light) {
+        .lb-loader-chip {
+          background: rgba(255, 255, 255, 0.96); color: #1f2328;
+          border-color: rgba(15, 23, 42, 0.12);
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lb-loader:before, .lb-loader:after { animation-duration: 4s; }
+      }
+    `;
+
     const BUTTON_STYLE = {
       display: 'inline-flex',
       alignItems: 'center',
@@ -276,9 +328,23 @@ window.__ModuleLoader__.load({
 
       const label = status.busy ? '译…' : status.done ? '已发送' : '译';
 
+      const loader = status.busy
+        ? h(
+            'div',
+            { className: 'lb-loader-chip', role: 'status', 'aria-live': 'polite' },
+            h(
+              'div',
+              { className: 'lb-loader-box' },
+              h('div', { className: 'lb-loader', 'aria-hidden': 'true' }),
+            ),
+            h('span', null, '正在翻译…'),
+          )
+        : null;
+
       return h(
         'span',
         { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: 0 } },
+        h('style', null, LOADER_CSS),
         h(
           'button',
           {
@@ -308,6 +374,7 @@ window.__ModuleLoader__.load({
               },
               status.error,
             ),
+        loader,
       );
     }
 

@@ -1,0 +1,38 @@
+.loading-326  {
+     width: 100px;
+     aspect-ratio: 1;
+     padding: 10px;
+     box-sizing: border-box;
+     display: grid;
+     background: #fff;
+     filter: blur(5px) contrast(10) hue-rotate(300deg);
+     mix-blend-mode: darken;
+}
+ .loading-326:before,.loading-326:after  {
+     content: "";
+     grid-area: 1/1;
+     width: 40px;
+     height: 40px;
+     background: #ffff00;
+     animation: loading-326 2s infinite;
+}
+ .loading-326:after  {
+     animation-delay: -1s;
+}
+ @keyframes loading-326  {
+     0%  {
+     transform: translate(0, 0);
+}
+ 25%  {
+     transform: translate(100%, 0);
+}
+ 50%  {
+     transform: translate(100%, 100%);
+}
+ 75%  {
+     transform: translate(0, 100%);
+}
+ 100%  {
+     transform: translate(0, 0);
+}
+}

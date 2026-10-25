@@ -43,6 +43,34 @@ function findButton(element: Element): Element | null {
   return null;
 }
 
+/** Depth-first search for an element carrying `className`. */
+function findByClass(element: Element, className: string): Element | null {
+  if (typeof element.props["className"] === "string" && (element.props["className"] as string).includes(className)) {
+    return element;
+  }
+  const children = (element.props["children"] ?? []) as unknown[];
+  for (const child of Array.isArray(children) ? children : [children]) {
+    if (child !== null && typeof child === "object" && "type" in child) {
+      const found = findByClass(child as Element, className);
+      if (found !== null) return found;
+    }
+  }
+  return null;
+}
+
+/** Depth-first search for the first element of a tag name. */
+function findByType(element: Element, type: string): Element | null {
+  if (element.type === type) return element;
+  const children = (element.props["children"] ?? []) as unknown[];
+  for (const child of Array.isArray(children) ? children : [children]) {
+    if (child !== null && typeof child === "object" && "type" in child) {
+      const found = findByType(child as Element, type);
+      if (found !== null) return found;
+    }
+  }
+  return null;
+}
+
 async function createHarness(): Promise<Harness> {
   const source = await readFile(CLIENT_FILE, "utf8");
   let definition: { factory: (require: (id: string) => unknown) => Record<string, unknown> } | null = null;
@@ -183,6 +211,15 @@ describe("dsh plugin · 译并发送", () => {
     assert.equal(button?.props["aria-label"], "翻译并发送");
 
     (button?.props["onClick"] as () => void)();
+
+    // The busy state must render the loading animation from release/动画.txt.
+    const busyTree = harness.render(draftState, actions);
+    assert.ok(findByClass(busyTree, "lb-loader-chip") !== null, "the loader chip must show while translating");
+    assert.ok(findByClass(busyTree, "lb-loader") !== null, "the animation element must be rendered");
+    const styleElement = findByType(busyTree, "style");
+    assert.ok(styleElement !== null, "the loader stylesheet must be inlined");
+    const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
+    assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {
