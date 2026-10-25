@@ -244,17 +244,27 @@ window.__ModuleLoader__.load({
         75%  { transform: translate(0, 100%); }
         100% { transform: translate(0, 0); }
       }
-      /* 行内版本：与「译」按钮同一行、放在它左边，压到 26px 不撑高工具行 */
+      /* 常驻动画：track 只占 26px，不改变工具行布局；
+         inline 绝对定位在 track 里，用 transform 平移，移动过程不触发重排。 */
+      .lb-loader-track {
+        position: relative; width: 26px; height: 26px; flex: none;
+        display: inline-block;
+      }
       .lb-loader-inline {
-        width: 26px; height: 26px; flex: none; position: relative;
+        position: absolute; inset: 0;
         display: inline-flex; align-items: center; justify-content: center;
         overflow: hidden; border-radius: 6px; background: #fff;
         box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
       }
       .lb-loader-inline .lb-loader {
         position: absolute; left: 50%; top: 50%;
         transform: translate(-50%, -50%) scale(0.26); transform-origin: center;
       }
+      /* 空闲时停在最左端：不跑动画，保持一个静止的小方块 */
+      .lb-loader-paused .lb-loader:before,
+      .lb-loader-paused .lb-loader:after { animation: none; }
       @media (prefers-reduced-motion: reduce) {
         .lb-loader:before, .lb-loader:after { animation: none; }
       }
@@ -280,6 +290,22 @@ window.__ModuleLoader__.load({
       const input = props.useInput((state) => state);
       const actions = props.inputActions;
       const [status, setStatus] = React.useState({ busy: false, error: null, done: false });
+      // 空闲位置：默认左移 72px，挂载后按"前一个控件右边缘 + 8px"收紧，
+      // 保证最远只走到不覆盖其它元素的地方。
+      const [travel, setTravel] = React.useState(72);
+      const trackRef = React.useRef(null);
+      React.useEffect(() => {
+        const track = trackRef.current;
+        if (track === null || typeof track.getBoundingClientRect !== 'function') return;
+        const rect = track.getBoundingClientRect();
+        const previous = track.previousElementSibling;
+        const previousRight =
+          previous !== null && typeof previous.getBoundingClientRect === 'function'
+            ? previous.getBoundingClientRect().right
+            : 0;
+        const available = Math.floor(rect.left - previousRight - 8);
+        if (Number.isFinite(available) && available > 0) setTravel(Math.min(120, available));
+      }, []);
       // 每次渲染都刷新，供提交前"等草稿真的变成译文"的循环读取。
       const latestDraft = React.useRef('');
       latestDraft.current = readDraft(input);
@@ -324,18 +350,26 @@ window.__ModuleLoader__.load({
 
       const label = status.busy ? '译…' : status.done ? '已发送' : '译';
 
-      const loader = status.busy
-        ? h(
-            'span',
-            {
-              className: 'lb-loader-inline',
-              role: 'status',
-              'aria-label': '正在翻译',
-              title: '正在翻译…',
-            },
-            h('span', { className: 'lb-loader', 'aria-hidden': 'true' }),
-          )
-        : null;
+      const loader = h(
+        'span',
+        {
+          className: 'lb-loader-track',
+          ref: trackRef,
+          'aria-hidden': status.busy ? 'false' : 'true',
+          title: status.busy ? '正在翻译…' : '译并发送（本机引擎）',
+        },
+        h(
+          'span',
+          {
+            // key 变化让忙碌态重新挂载，动画从头开始跑满三圈
+            key: status.busy ? 'running' : 'idle',
+            className: status.busy ? 'lb-loader-inline' : 'lb-loader-inline lb-loader-paused',
+            // 空闲停最左，点击后缓慢右移到按钮旁（1.2s）
+            style: { transform: `translateX(${status.busy ? 0 : -travel}px)` },
+          },
+          h('span', { className: 'lb-loader', 'aria-hidden': 'true' }),
+        ),
+      );
 
       return h(
         'span',

@@ -103,6 +103,10 @@ async function createHarness(): Promise<Harness> {
       if (!(index in hooks)) hooks[index] = { current: initial };
       return hooks[index];
     },
+    useEffect: (fn: unknown) => {
+      const index = cursor++;
+      hooks[index] = fn;
+    },
   };
 
   const windowStub = {
@@ -212,16 +216,39 @@ describe("dsh plugin · 译并发送", () => {
 
     (button?.props["onClick"] as () => void)();
 
-    // The busy state must render the loading animation from release/动画.txt,
-    // inline to the LEFT of the button and on the same row.
+    // The loader is always mounted and parked to the far left while idle.
+    const idleLoader = findByClass(tree, "lb-loader-inline");
+    assert.ok(idleLoader !== null, "the loader must always be rendered, not only while busy");
+    assert.ok(
+      String(idleLoader?.props["className"]).includes("lb-loader-paused"),
+      "the idle loader must have its animation paused",
+    );
+    assert.ok(
+      String((idleLoader?.props["style"] as Record<string, unknown>)["transform"]).startsWith("translateX(-"),
+      "the idle loader must be parked to the left",
+    );
+
+    (button?.props["onClick"] as () => void)();
+
+    // Busy: same row, left of the button, animation running, moved next to it.
     const busyTree = harness.render(draftState, actions);
-    assert.ok(findByClass(busyTree, "lb-loader-inline") !== null, "the inline loader must show while translating");
+    const busyLoader = findByClass(busyTree, "lb-loader-inline");
+    assert.ok(busyLoader !== null, "the inline loader must be present while translating");
+    assert.ok(
+      !String(busyLoader?.props["className"]).includes("lb-loader-paused"),
+      "the busy loader must run its animation",
+    );
+    assert.equal(
+      (busyLoader?.props["style"] as Record<string, unknown>)["transform"],
+      "translateX(0px)",
+      "the busy loader must sit next to the button",
+    );
     assert.ok(findByClass(busyTree, "lb-loader") !== null, "the animation element must be rendered");
 
     const asElement = (value: unknown): Element | null =>
       value !== null && typeof value === "object" && "type" in (value as object) ? (value as Element) : null;
     const row = (busyTree.props["children"] ?? []) as unknown[];
-    const loaderIndex = row.findIndex((child) => asElement(child)?.props["className"] === "lb-loader-inline");
+    const loaderIndex = row.findIndex((child) => asElement(child)?.props["className"] === "lb-loader-track");
     const buttonIndex = row.findIndex((child) => asElement(child)?.type === "button");
     assert.ok(loaderIndex >= 0 && buttonIndex >= 0, "both the loader and the button must be in the row");
     assert.ok(loaderIndex < buttonIndex, "the loader must render to the left of the button");

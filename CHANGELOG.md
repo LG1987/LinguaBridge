@@ -8,18 +8,21 @@
 
 ### 新增
 
-- 插件忙碌态动画：`release/动画.txt` 里的 `.loading-326` 改写为 `lb-loader`。两个黄色方块在 `blur(5px) contrast(10)` 下粘合、绕网格循环位移，外面套 26px 白色容器隔离 `mix-blend-mode: darken`（否则深色主题下会变全黑）。动画**行内渲染在「译」按钮左侧、与按钮同一水平线**，不撑高工具行。
-- `prefers-reduced-motion: reduce` 下把循环从 2s 放慢到 4s。
+- 插件忙碌态动画：`release/动画.txt` 里的 `.loading-326` 改写为 `lb-loader`。两个黄色方块在 `blur(5px) contrast(10)` 下粘合、绕网格循环位移，外面套 26px 白色容器隔离 `mix-blend-mode: darken`（否则深色主题下会变全黑）。
+- **动画常驻**：平时停在「译」按钮左侧最远处（挂载时按"前一个控件右边缘 + 8px"测量，最多 120px，不覆盖其它元素）；点击翻译后以 1.2s 缓动**向右滑到按钮旁**，结束后再滑回原处。
+- 动画 **2s 一圈 × 3 圈**，忙碌期间跑满三圈；空闲时暂停，保持静止小方块。
+- 忙碌态**固定展示 6 秒**——翻译通常先完成，完成后动画继续展示到满 6 秒再收；`submit()` 在等待之前就已调用，发送不被延迟。
+- `prefers-reduced-motion: reduce` 下改为静态。
 
 ### 变更
 
-- 忙碌态**固定展示 6 秒**——翻译通常先完成，完成后动画继续展示到满 6 秒再收；`submit()` 在等待之前就已调用，发送不被延迟。
-- 动画 **2s 一圈 × 3 圈 = 6s**，播完即停，不再无限循环；`prefers-reduced-motion` 下改为静态。
+- 忙碌态**固定展示 6 秒**，动画 2s 一圈 × 3 圈 = 6s，播完即停。
+- 动画**常驻**：空闲停在最左，点击后 1.2s 缓动右移到按钮旁，结束后滑回。
 
 ### 产物
 
 - `LinguaBridge-extension-0.2.1.zip` — sha256 `6bd6843e6b636d12f543beeaace2e685874fb2ee63dff015fcdedd3d91df97bb`
-- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `b91930156a092729305ba9f670bdfbe1d99c3c7f15704ee7838bd139bd9eb3c2`
+- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `244b513a99425c2b94f32b476016c43a8b822891f70a1c24b4c1cecff1277bac`
 
 > 本版只产出本地包并入仓库；GitHub Release 仍停在 v0.2.0，待需要时再发布。浏览器扩展的动画留待后续版本。
 
