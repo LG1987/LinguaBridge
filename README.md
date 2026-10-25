@@ -4,11 +4,16 @@
 
 DSH（DeepSeek Harness）优先适配，兼容 ChatGPT。
 
-**当前版本：v0.1.0**（首个可运行版本，覆盖 P0–P3）— 变更记录见 [CHANGELOG.md](CHANGELOG.md)；发布包见 `release/`。
+**当前版本：v0.2.0**（第二版）— 新增 **DSH 原生插件「译并发送」**；扩展与引擎行为不变。变更记录见 [CHANGELOG.md](CHANGELOG.md)，本版定义与方案见 [docs/releases/v0.2.0.md](docs/releases/v0.2.0.md)。
 
-**进行中的需求变更**：RC-001「发送即翻译」（输入中文、发送后会话里显示英文）— 见 [docs/requirement-changes.md](docs/requirement-changes.md)。该变更与当前"手动确认"行为冲突，实现方式待定。
+**两种交付形态**
 
-**文档**：[原始方案](docs/spec-v2.0-original.md) · [架构与实现决策](docs/architecture.md) · [验收手册](docs/acceptance.md) · [变更记录](CHANGELOG.md)
+| 形态 | 适用 | 产物 |
+|------|------|------|
+| 浏览器扩展 | Chrome/Edge 打开 DSH Web UI 或 ChatGPT | `LinguaBridge-extension-<version>.zip` |
+| DSH 原生插件 | 直接装在 DSH 桌面版/Web 的输入区（无需浏览器扩展） | `LinguaBridge-dsh-plugin-<version>.zip` |
+
+**文档**：[原始方案](docs/spec-v2.0-original.md) · [架构与实现决策](docs/architecture.md) · [验收手册](docs/acceptance.md) · [需求变更 RC-001](docs/requirement-changes.md) · [变更记录](CHANGELOG.md)
 
 ---
 
@@ -128,18 +133,22 @@ pwsh -File tools\mock-ui.ps1     # 前台运行，Ctrl+C 停止
 ## 发布打包
 
 ```powershell
-pwsh -File scripts\package.ps1                 # 构建 + 校验 + 打包，版本取 package.json
-pwsh -File scripts\package.ps1 -Version 0.1.1  # 改版本号后重新打包
-pwsh -File scripts\package.ps1 -SkipBuild      # 复用当前 dist
+pwsh -File scripts\package.ps1                  # 扩展：构建 + 校验 + 打包（-Tag extension）
+pwsh -File scripts\package-plugin.ps1           # DSH 插件：校验 + 打包（无构建步骤）
+pwsh -File scripts\package.ps1 -Version 0.2.1   # 改版本号后重新打包
+pwsh -File scripts\package.ps1 -SkipBuild       # 复用当前 dist
 ```
 
-产物在 `release/`（**已入库**，可直接下载，无需先构建）：
+产物在 `release/`（**已入库**，可直接下载，无需先构建）。从 v0.2.0 起文件名带**组件标识**：
 
 | 文件 | 内容 |
 |------|------|
-| `LinguaBridge-<version>.zip` | 可「加载解压缩的扩展」的目录结构（顶层 `LinguaBridge-<version>/`，已排除 sourcemap） |
-| `LinguaBridge-<version>.json` | 构建时间、逐文件大小与 SHA-256、整包 SHA-256、加载说明 |
-| [`README.md`](release/README.md) | 软件包说明：包含哪些文件、每个文件的作用、完整功能列表、安装与校验 |
+| `LinguaBridge-extension-<version>.zip` | 扩展包，解压即「加载解压缩的扩展」（已排除 sourcemap） |
+| `LinguaBridge-dsh-plugin-<version>.zip` | DSH 插件包，解压后把顶层目录作为 `install_bundle` 的 target |
+| `LinguaBridge-<component>-<version>.json` | 构建时间、逐文件与整包 SHA-256、安装说明 |
+| [`README.md`](release/README.md) | 发布物说明：命名约定、包内文件职责、功能清单、安装与校验 |
+
+> v0.1.0 的历史产物保留原名 `LinguaBridge-0.1.0.zip`（tag `v0.1.0` 指向它），未重命名。
 
 打包脚本会在以下情况**拒绝出包**：manifest 版本与 `package.json` 不一致、manifest 引用的 bundle 缺失、压缩包里混入 `.ts`/`.map`/测试文件。已实测校验：3 个文件、82 KB、逐文件哈希与元数据一致。
 

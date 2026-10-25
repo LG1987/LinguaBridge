@@ -12,7 +12,9 @@
 # referenced bundle is missing, or when development files leak into the package.
 param(
     [string]$Version = '',
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    # Component identifier embedded in the artifact name, e.g. LinguaBridge-extension-0.2.0.zip
+    [string]$Tag = 'extension'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -31,7 +33,7 @@ if ($Version -ne '') {
     Write-Host "package.json version -> $Version"
 }
 $version = $pkg.version
-$stageName = "LinguaBridge-$version"
+$stageName = "LinguaBridge-$Tag-$version"
 $stage = Join-Path $root ".tmp\release\$stageName"
 
 if (-not $SkipBuild) {
@@ -113,6 +115,7 @@ $totalBytes = 0
 foreach ($file in $files) { $totalBytes += [long]$file['bytes'] }
 $metadata = [ordered]@{
     name         = 'LinguaBridge'
+    component    = $Tag
     version      = $version
     kind         = 'chrome-mv3-unpacked'
     builtAt      = (Get-Date).ToString('o')

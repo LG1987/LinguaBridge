@@ -2,6 +2,35 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。当前只发布扩展（服务为源码形式，随仓库更新）。
 
+## [0.2.0] — 2026-10-25
+
+第二版：新增 **DSH 原生插件「译并发送」**，扩展与本地引擎的既有接口和行为不变（向后兼容的 minor）。版本定义与改动方案见 [docs/releases/v0.2.0.md](docs/releases/v0.2.0.md)。
+
+### 新增
+
+- `dsh-plugin/linguabridge-send/`：DSH 客户端插件，在输入框右侧工具行加「译」按钮。点一次 = 读草稿（`InputState.draft`）→ 本机引擎译成英文 → `inputActions.setDraft` 写回 → 等投影发布 → `submit()`。会话里你自己的消息即英文。
+- 插件内置与扩展同一套**结构性格式保护**：代码块、行内代码、URL、邮箱、路径、命令、环境变量、`{{模板}}` 不进引擎、直接拼回。
+- `test/dsh-plugin.local.ts`：加载真实 `client.js`（React 钩子桩）并点击按钮，对真实引擎断言——正常链路、引擎不可达不发送、空草稿不发送。
+- `docs/requirement-changes.md`：RC-001「发送即翻译」的需求定义、实测约束与四种方案取舍。
+- `docs/releases/v0.2.0.md`：本版版本定义、改动方案、证据与回滚说明。
+- `scripts/package-plugin.ps1`：插件打包与校验。
+
+### 变更
+
+- 发布物命名带**组件标识**：`LinguaBridge-extension-<version>.zip` / `LinguaBridge-dsh-plugin-<version>.zip`，各自配套 `.json` 元数据。
+- `scripts/package.ps1` 新增 `-Tag`，用于生成带组件标识的文件名。
+
+### 修复
+
+- 插件读不到草稿：字段应为 `InputState.draft`（此前按 `clipboardText/text/value` 探测，恒为空）。
+- 插件格式保护：多条规则独立收集区间时，"未闭合围栏"会匹配到已闭合的代码块并延伸到文末，导致其后的中文不翻译。重叠匹配现被跳过。
+
+### 已知问题
+
+- 插件仅覆盖**用户输入**的中→英；AI 回复译中文仍由浏览器扩展提供。
+- 插件按"方案 A"落地：点的是新增的「译」按钮，而非原生发送键（原生键无公开拦截钩子，接管需替换 composer）。
+- Argos 质量限制同 0.1.0；插件会改写草稿，撤销体验与原生不同。
+
 ## [0.1.0] — 2026-10-25
 
 首个可运行版本，覆盖方案中的 P0–P3。
