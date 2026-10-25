@@ -13,12 +13,12 @@
 
 ### 变更
 
-- 忙碌态最短可见 700 ms——本机翻译常只要 300–600 ms，否则动画一闪而过像没反应；`submit()` 不被延迟。
+- 忙碌态**固定至少显示 3 秒**——本机翻译常只要 300–600 ms，否则动画一闪而过像没反应；`submit()` 在等待之前就已调用，发送不被延迟。
 
 ### 产物
 
 - `LinguaBridge-extension-0.2.1.zip` — sha256 `6bd6843e6b636d12f543beeaace2e685874fb2ee63dff015fcdedd3d91df97bb`
-- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `152e974756574e9ff1f7ae20cae4b11726a0fea239f4bb2b1ab792aeb2ad1623`
+- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `902fdd3399414eb0887efc7015f1450a0840ae32202fa42793ce491eb3a029d9`
 
 > 本版只产出本地包并入仓库；GitHub Release 仍停在 v0.2.0，待需要时再发布。浏览器扩展的动画留待后续版本。
 
