@@ -212,14 +212,25 @@ describe("dsh plugin · 译并发送", () => {
 
     (button?.props["onClick"] as () => void)();
 
-    // The busy state must render the loading animation from release/动画.txt.
+    // The busy state must render the loading animation from release/动画.txt,
+    // inline to the LEFT of the button and on the same row.
     const busyTree = harness.render(draftState, actions);
-    assert.ok(findByClass(busyTree, "lb-loader-chip") !== null, "the loader chip must show while translating");
+    assert.ok(findByClass(busyTree, "lb-loader-inline") !== null, "the inline loader must show while translating");
     assert.ok(findByClass(busyTree, "lb-loader") !== null, "the animation element must be rendered");
+
+    const asElement = (value: unknown): Element | null =>
+      value !== null && typeof value === "object" && "type" in (value as object) ? (value as Element) : null;
+    const row = (busyTree.props["children"] ?? []) as unknown[];
+    const loaderIndex = row.findIndex((child) => asElement(child)?.props["className"] === "lb-loader-inline");
+    const buttonIndex = row.findIndex((child) => asElement(child)?.type === "button");
+    assert.ok(loaderIndex >= 0 && buttonIndex >= 0, "both the loader and the button must be in the row");
+    assert.ok(loaderIndex < buttonIndex, "the loader must render to the left of the button");
+
     const styleElement = findByType(busyTree, "style");
     assert.ok(styleElement !== null, "the loader stylesheet must be inlined");
     const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
     assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");
+    assert.ok(!css.includes("position: fixed"), "the loader must be inline, not a floating overlay");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {

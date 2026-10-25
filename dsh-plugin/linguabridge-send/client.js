@@ -241,30 +241,16 @@ window.__ModuleLoader__.load({
         75%  { transform: translate(0, 100%); }
         100% { transform: translate(0, 0); }
       }
-      .lb-loader-chip {
-        position: fixed; left: 50%; bottom: 128px; transform: translateX(-50%);
-        display: flex; align-items: center; gap: 10px;
-        padding: 6px 14px 6px 6px; border-radius: 12px;
-        background: rgba(20, 22, 28, 0.94); color: #e6e8ee;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-        font-size: 12px; line-height: 1; letter-spacing: 0.02em;
-        z-index: 2147483000; pointer-events: none; user-select: none;
+      /* 行内版本：与「译」按钮同一行、放在它左边，压到 26px 不撑高工具行 */
+      .lb-loader-inline {
+        width: 26px; height: 26px; flex: none; position: relative;
+        display: inline-flex; align-items: center; justify-content: center;
+        overflow: hidden; border-radius: 6px; background: #fff;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
       }
-      .lb-loader-box {
-        width: 44px; height: 44px; flex: none; position: relative;
-        overflow: hidden; border-radius: 7px; background: #fff;
-      }
-      .lb-loader-box .lb-loader {
+      .lb-loader-inline .lb-loader {
         position: absolute; left: 50%; top: 50%;
-        transform: translate(-50%, -50%) scale(0.42); transform-origin: center;
-      }
-      @media (prefers-color-scheme: light) {
-        .lb-loader-chip {
-          background: rgba(255, 255, 255, 0.96); color: #1f2328;
-          border-color: rgba(15, 23, 42, 0.12);
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-        }
+        transform: translate(-50%, -50%) scale(0.26); transform-origin: center;
       }
       @media (prefers-reduced-motion: reduce) {
         .lb-loader:before, .lb-loader:after { animation-duration: 4s; }
@@ -337,14 +323,14 @@ window.__ModuleLoader__.load({
 
       const loader = status.busy
         ? h(
-            'div',
-            { className: 'lb-loader-chip', role: 'status', 'aria-live': 'polite' },
-            h(
-              'div',
-              { className: 'lb-loader-box' },
-              h('div', { className: 'lb-loader', 'aria-hidden': 'true' }),
-            ),
-            h('span', null, '正在翻译…'),
+            'span',
+            {
+              className: 'lb-loader-inline',
+              role: 'status',
+              'aria-label': '正在翻译',
+              title: '正在翻译…',
+            },
+            h('span', { className: 'lb-loader', 'aria-hidden': 'true' }),
           )
         : null;
 
@@ -352,6 +338,8 @@ window.__ModuleLoader__.load({
         'span',
         { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: 0 } },
         h('style', null, LOADER_CSS),
+        // 动画在按钮左侧、同一水平线：先渲染 loader，再渲染按钮。
+        loader,
         h(
           'button',
           {
@@ -381,7 +369,6 @@ window.__ModuleLoader__.load({
               },
               status.error,
             ),
-        loader,
       );
     }
 

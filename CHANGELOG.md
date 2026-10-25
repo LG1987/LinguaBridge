@@ -8,7 +8,7 @@
 
 ### 新增
 
-- 插件忙碌态动画：`release/动画.txt` 里的 `.loading-326` 改写为 `lb-loader`。两个黄色方块在 `blur(5px) contrast(10)` 下粘合、绕网格循环位移，外面套 44px 白色容器隔离 `mix-blend-mode: darken`（否则深色主题下会变全黑），整体以 `position: fixed` 悬浮条浮在输入框上方，不参与 composer 布局。
+- 插件忙碌态动画：`release/动画.txt` 里的 `.loading-326` 改写为 `lb-loader`。两个黄色方块在 `blur(5px) contrast(10)` 下粘合、绕网格循环位移，外面套 26px 白色容器隔离 `mix-blend-mode: darken`（否则深色主题下会变全黑）。动画**行内渲染在「译」按钮左侧、与按钮同一水平线**，不撑高工具行。
 - `prefers-reduced-motion: reduce` 下把循环从 2s 放慢到 4s。
 
 ### 变更
@@ -18,7 +18,7 @@
 ### 产物
 
 - `LinguaBridge-extension-0.2.1.zip` — sha256 `6bd6843e6b636d12f543beeaace2e685874fb2ee63dff015fcdedd3d91df97bb`
-- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `2582c12704b366b43393ed478494d5def3ec7de33b63a5c75afd4a4a0f966b08`
+- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `152e974756574e9ff1f7ae20cae4b11726a0fea239f4bb2b1ab792aeb2ad1623`
 
 > 本版只产出本地包并入仓库；GitHub Release 仍停在 v0.2.0，待需要时再发布。浏览器扩展的动画留待后续版本。
 
