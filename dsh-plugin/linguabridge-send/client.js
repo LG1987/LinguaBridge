@@ -255,9 +255,17 @@ window.__ModuleLoader__.load({
         display: inline-flex; align-items: center; justify-content: center;
         overflow: hidden; border-radius: 6px; background: #fff;
         box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
-        /* 6s 匀速走完全程 */
-        transition: transform 6s linear;
         will-change: transform;
+      }
+      /* 位移用 keyframes 而不是 transition：
+         在同一帧里切换 transition:none → 6s，浏览器经常不启动过渡，
+         表现为"点击后什么都没动"。keyframes 没有这个坑。 */
+      @keyframes lb-sweep {
+        from { transform: translateX(var(--lb-travel, -240px)); }
+        to   { transform: translateX(0px); }
+      }
+      .lb-loader-inline.lb-sweep {
+        animation: lb-sweep 6s linear both;
       }
       .lb-loader-inline .lb-loader {
         position: absolute; left: 50%; top: 50%;
@@ -288,8 +296,6 @@ window.__ModuleLoader__.load({
       const input = props.useInput((state) => state);
       const actions = props.inputActions;
       const [status, setStatus] = React.useState({ busy: false, error: null, done: false });
-      // 点击瞬间跳到最左：此时关闭 transition，直接落位，再由下一帧开启 6s 匀速右移。
-      const [jumpLeft, setJumpLeft] = React.useState(false);
       // 空闲位置：默认左移 72px；挂载后实测到"输入卡片左侧、第一个控件之后"，
       // 也就是工具行最左侧仍不覆盖其它元素的位置。
       const [travel, setTravel] = React.useState(72);
@@ -315,7 +321,8 @@ window.__ModuleLoader__.load({
             if (firstRect.width > 0) leftLimit = Math.max(leftLimit, firstRect.right + 8);
           }
           const distance = Math.floor(trackRect.left - leftLimit);
-          if (Number.isFinite(distance)) setTravel(Math.max(0, Math.min(800, distance)));
+          // 下限 120px：测量失败或空间过窄时也保证有可见位移
+          if (Number.isFinite(distance)) setTravel(Math.max(120, Math.min(800, distance)));
         };
 
         measure();
@@ -336,14 +343,9 @@ window.__ModuleLoader__.load({
         }
 
         setStatus({ busy: true, error: null, done: false });
-        setJumpLeft(true); // 点击后立刻出现在最左（[+] 旁边）
 
         void (async () => {
           try {
-            // 先把"在最左"画出来，否则 transition 从 0 出发、看起来没有移动
-            await new Promise((resolve) => setTimeout(resolve, 30));
-            setJumpLeft(false); // 打开 6s 匀速，向右滑回按钮旁
-
             const english = await translateDraft(draft);
             if (english.trim() === '') throw new Error('译文为空，未发送');
             actions.setDraft(english);
@@ -370,8 +372,6 @@ window.__ModuleLoader__.load({
               error: (error !== null && typeof error === 'object' && error.message) || String(error),
               done: false,
             });
-          } finally {
-            setJumpLeft(false);
           }
         })();
       }, [actions, input, status.busy]);
@@ -389,11 +389,9 @@ window.__ModuleLoader__.load({
         h(
           'span',
           {
-            className: 'lb-loader-inline',
-            // 平时就在按钮旁；点击后瞬间落到最左，再用 6s 匀速滑回来
-            style: jumpLeft
-              ? { transform: `translateX(${-travel}px)`, transition: 'none' }
-              : { transform: 'translateX(0px)' },
+            className: status.busy ? 'lb-loader-inline lb-sweep' : 'lb-loader-inline',
+            // 距离由实测得出，写进 CSS 变量，供 lb-sweep 的 from 使用
+            style: { '--lb-travel': `-${travel}px` },
           },
           h('span', { className: 'lb-loader', 'aria-hidden': 'true' }),
         ),

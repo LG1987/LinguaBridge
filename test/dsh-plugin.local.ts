@@ -216,53 +216,48 @@ describe("dsh plugin · 译并发送", () => {
 
     (button?.props["onClick"] as () => void)();
 
-    // Idle: the loader already sits beside the button and keeps turning.
+    // Idle: the loader sits beside the button, turning, and is not sweeping.
     const idleLoader = findByClass(tree, "lb-loader-inline");
     assert.ok(idleLoader !== null, "the loader must always be rendered, not only while busy");
-    assert.ok(
-      !String(idleLoader?.props["className"]).includes("paused"),
-      "the animation must keep running regardless of position",
-    );
-    assert.equal(
-      (idleLoader?.props["style"] as Record<string, unknown>)["transform"],
-      "translateX(0px)",
-      "the idle loader must sit beside the button",
-    );
+    const idleClass = String(idleLoader?.props["className"]);
+    assert.ok(!idleClass.includes("paused"), "the animation must keep running regardless of position");
+    assert.ok(!idleClass.includes("lb-sweep"), "the idle loader must not be sweeping");
+    const travelVar = (idleLoader?.props["style"] as Record<string, unknown>)["--lb-travel"];
+    assert.ok(String(travelVar).startsWith("-"), "the sweep distance must be a negative offset");
 
     (button?.props["onClick"] as () => void)();
 
-    // Right after the click it jumps to the far left with transition disabled.
-    const jumpTree = harness.render(draftState, actions);
-    const jumpLoader = findByClass(jumpTree, "lb-loader-inline");
-    assert.ok(jumpLoader !== null, "the loader must still be mounted after the click");
-    const jumpStyle = jumpLoader?.props["style"] as Record<string, unknown>;
-    assert.ok(String(jumpStyle["transform"]).startsWith("translateX(-"), "the loader must jump to the far left");
-    assert.equal(jumpStyle["transition"], "none", "the jump must be instant, not animated");
-
-    // One frame later it travels right under the 6s transition.
-    await new Promise((resolve) => setTimeout(resolve, 80));
-    const movingTree = harness.render(draftState, actions);
-    const movingLoader = findByClass(movingTree, "lb-loader-inline");
-    const movingStyle = movingLoader?.props["style"] as Record<string, unknown>;
-    assert.equal(movingStyle["transform"], "translateX(0px)", "the loader must travel back to the button");
-    assert.equal(movingStyle["transition"], undefined, "the travel must use the stylesheet transition");
-    assert.ok(findByClass(movingTree, "lb-loader") !== null, "the animation element must be rendered");
+    // Busy: the sweep animation starts from that offset and runs 6s to the right.
+    const busyTree = harness.render(draftState, actions);
+    const busyLoader = findByClass(busyTree, "lb-loader-inline");
+    assert.ok(busyLoader !== null, "the loader must still be mounted after the click");
+    assert.ok(
+      String(busyLoader?.props["className"]).includes("lb-sweep"),
+      "the busy loader must run the sweep animation",
+    );
+    assert.equal(
+      (busyLoader?.props["style"] as Record<string, unknown>)["--lb-travel"],
+      travelVar,
+      "the sweep must start from the measured offset",
+    );
+    assert.ok(findByClass(busyTree, "lb-loader") !== null, "the animation element must be rendered");
 
     const asElement = (value: unknown): Element | null =>
       value !== null && typeof value === "object" && "type" in (value as object) ? (value as Element) : null;
-    const row = (movingTree.props["children"] ?? []) as unknown[];
+    const row = (busyTree.props["children"] ?? []) as unknown[];
     const loaderIndex = row.findIndex((child) => asElement(child)?.props["className"] === "lb-loader-track");
     const buttonIndex = row.findIndex((child) => asElement(child)?.type === "button");
     assert.ok(loaderIndex >= 0 && buttonIndex >= 0, "both the loader and the button must be in the row");
     assert.ok(loaderIndex < buttonIndex, "the loader must render to the left of the button");
 
-    const styleElement = findByType(movingTree, "style");
+    const styleElement = findByType(busyTree, "style");
     assert.ok(styleElement !== null, "the loader stylesheet must be inlined");
     const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
     assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");
     assert.ok(!css.includes("position: fixed"), "the loader must be inline, not a floating overlay");
     assert.ok(css.includes("lb-loader 2s infinite"), "the animation must run continuously");
-    assert.ok(css.includes("transform 6s linear"), "the travel must take six seconds at constant speed");
+    assert.ok(css.includes("@keyframes lb-sweep"), "the travel must be a keyframe animation, not a transition");
+    assert.ok(css.includes("lb-sweep 6s linear"), "the travel must take six seconds at constant speed");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {
