@@ -13,7 +13,8 @@
     "test:live": "node test/integration.local.ts",
     "test:corpus": "node test/corpus.local.ts",
     "engine": "pwsh -NoProfile -File tools/start-engine.ps1 -Background",
-    "health": "pwsh -NoProfile -File tools/health-check.ps1"
+    "health": "pwsh -NoProfile -File tools/health-check.ps1",
+    "test:plugin": "node test/dsh-plugin.local.ts"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.6",

@@ -53,6 +53,8 @@ window.__ModuleLoader__.load({
     /** 收集所有受保护区间并按位置合并，返回 [start, end) 列表。 */
     function protectSpans(text) {
       const spans = [];
+      const overlaps = (start, end) => spans.some(([s, e]) => start < e && s < end);
+
       for (const rule of PROTECT_RULES) {
         rule.lastIndex = 0;
         let match;
@@ -61,14 +63,18 @@ window.__ModuleLoader__.load({
             rule.lastIndex += 1;
             continue;
           }
-          spans.push([match.index, match.index + match[0].length]);
+          const start = match.index;
+          const end = start + match[0].length;
+          // 规则彼此独立：后置规则（例如"未闭合围栏"）会匹配到已被前置规则
+          // 覆盖的区域并一直延伸到文末。跳过这类重叠匹配，避免吞掉正文。
+          if (!overlaps(start, end)) spans.push([start, end]);
         }
       }
       spans.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
       const merged = [];
       for (const span of spans) {
         const last = merged[merged.length - 1];
-        if (last !== undefined && span[0] < last[1]) {
+        if (last !== undefined && span[0] <= last[1]) {
           last[1] = Math.max(last[1], span[1]);
           continue;
         }
@@ -173,7 +179,8 @@ window.__ModuleLoader__.load({
         }
         const core = segment.value.trim();
         if (core === '' || !HAS_TRANSLATABLE.test(core)) {
-          pieces.push(segment.value);
+          // 纯标点片段不送引擎，但全角标点在英文里仍然要转半角。
+          pieces.push(normalizePunctuation(segment.value));
           continue;
         }
         const lead = segment.value.match(/^\s*/)[0];
@@ -188,12 +195,17 @@ window.__ModuleLoader__.load({
     // ---------------------------------------------------------------- 草稿读取
 
     /**
-     * InputState 是编辑器投影 + 提交面状态。字段名跨版本可能变化，
-     * 因此按可信度依次探测；全都读不到时返回空串，由调用方拒绝发送。
+     * InputState 的公开字段是 `draft`（composer 自身就是 `input?.draft ?? ""`）。
+     * 其余名字保留为跨版本兜底；全都读不到时返回空串，由调用方拒绝发送。
      */
     function readDraft(state) {
       if (state === null || typeof state !== 'object') return '';
-      const candidates = [state.clipboardText, state.text, state.value];
+      const candidates = [
+        state.draft,
+        state.clipboardText,
+        state.text,
+        state.value,
+      ];
       if (state.projection !== null && typeof state.projection === 'object') {
         candidates.push(state.projection.clipboardText, state.projection.text);
       }
@@ -225,26 +237,33 @@ window.__ModuleLoader__.load({
       const input = props.useInput((state) => state);
       const actions = props.inputActions;
       const [status, setStatus] = React.useState({ busy: false, error: null, done: false });
+      // 每次渲染都刷新，供提交前"等草稿真的变成译文"的循环读取。
+      const latestDraft = React.useRef('');
+      latestDraft.current = readDraft(input);
 
       const onClick = React.useCallback(() => {
         if (status.busy) return;
         const draft = readDraft(input);
         if (draft.trim() === '') {
-          setStatus({ busy: false, error: '输入框是空的', done: false });
+          setStatus({ busy: false, error: '读不到输入框内容，请刷新页面（Ctrl+R）后重试', done: false });
           return;
         }
         setStatus({ busy: true, error: null, done: false });
         translateDraft(draft)
-          .then((english) => {
+          .then(async (english) => {
             if (english.trim() === '') throw new Error('译文为空，未发送');
             actions.setDraft(english);
             if (typeof actions.persistDraft === 'function') actions.persistDraft();
-            // Lexical 的投影在下一帧才发布，等一拍再提交，避免发出旧草稿。
-            return new Promise((resolve) => setTimeout(resolve, 120)).then(() => {
-              actions.submit();
-              setStatus({ busy: false, error: null, done: true });
-              setTimeout(() => setStatus({ busy: false, error: null, done: false }), 1600);
-            });
+            // Lexical 的投影在下一帧才发布：等草稿真的变成英文再提交，
+            // 否则会把旧的中文草稿发出去。
+            const deadline = Date.now() + 1500;
+            while (Date.now() < deadline) {
+              await new Promise((resolve) => setTimeout(resolve, 40));
+              if (latestDraft.current.trim() === english.trim()) break;
+            }
+            actions.submit();
+            setStatus({ busy: false, error: null, done: true });
+            setTimeout(() => setStatus({ busy: false, error: null, done: false }), 1600);
           })
           .catch((error) => {
             setStatus({

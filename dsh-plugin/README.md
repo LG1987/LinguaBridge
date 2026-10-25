@@ -31,7 +31,16 @@
 
 ## 已知限制 / 待验证
 
-- **草稿字段是探测式读取**：按 `clipboardText` / `text` / `value` / `projection.clipboardText` 依次尝试。若都读不到会报"输入框是空的"，此时需要按真实 `InputState` 字段名修正。
-- **未验证渲染与点击**：安装后只确认了插槽占用（`active: true`），按钮的实际外观与点击结果需要在页面里确认。
+- **草稿字段**：`InputState.draft`（composer 自身即为 `input?.draft ?? ""`），另有 `clipboardText` / `text` / `value` / `projection.*` 作为跨版本兜底。已由 `test/dsh-plugin.local.ts` 用真实 `client.js` 验证。
+- **未验证渲染**：安装后只确认了插槽占用（`active: true`）与逻辑测试；按钮的实际外观需要在页面里看。
 - **可能的 CSP 限制**：渲染进程直接 `fetch` 到 `127.0.0.1:5000`。若页面 CSP 禁止跨源连接，会报"连不上本地引擎"，届时需要改成 Host 侧代理。
+- **翻译质量**：Argos 属传统 NMT，长句与否定可能走样（实测「不要改写实现」会译成 "not rewritten to be achieved"）。格式是逐字保住的，语义需人工扫一眼。
 - 仅支持中 → 英；回复翻译仍由扩展或后续版本提供。
+
+## 测试
+
+```powershell
+node test\dsh-plugin.local.ts     # 用真实 client.js + 真实引擎跑通"点击→翻译→写回→提交"
+```
+
+三个用例：正常链路（含代码块逐字还原）、引擎不可达不发送、空草稿不发送。
