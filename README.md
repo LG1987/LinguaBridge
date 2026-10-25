@@ -6,6 +6,8 @@ DSH（DeepSeek Harness）优先适配，兼容 ChatGPT。
 
 **当前版本：v0.1.0**（首个可运行版本，覆盖 P0–P3）— 变更记录见 [CHANGELOG.md](CHANGELOG.md)；发布包见 `release/`。
 
+**进行中的需求变更**：RC-001「发送即翻译」（输入中文、发送后会话里显示英文）— 见 [docs/requirement-changes.md](docs/requirement-changes.md)。该变更与当前"手动确认"行为冲突，实现方式待定。
+
 **文档**：[原始方案](docs/spec-v2.0-original.md) · [架构与实现决策](docs/architecture.md) · [验收手册](docs/acceptance.md) · [变更记录](CHANGELOG.md)
 
 ---
