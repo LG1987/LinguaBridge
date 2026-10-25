@@ -6,6 +6,8 @@ DSH（DeepSeek Harness）优先适配，兼容 ChatGPT。
 
 **当前版本：v0.1.0**（首个可运行版本，覆盖 P0–P3）— 变更记录见 [CHANGELOG.md](CHANGELOG.md)；发布包见 `release/`。
 
+**文档**：[原始方案](docs/spec-v2.0-original.md) · [架构与实现决策](docs/architecture.md) · [验收手册](docs/acceptance.md) · [变更记录](CHANGELOG.md)
+
 ---
 
 ## 当前状态
@@ -216,6 +218,7 @@ LinguaBridge/
 ├─ scripts/build.mjs         通用构建入口（npm run build，非沙箱环境）
 ├─ scripts/package.ps1       发布打包：校验 + 排除 sourcemap + 哈希元数据
 ├─ CHANGELOG.md              版本变更记录
+├─ docs/                     开发文档（原方案 / 架构决策 / 验收手册）
 ├─ release/                  LinguaBridge-<version>.zip + 元数据（不入库）
 ├─ tools/
 │  ├─ install.ps1            一键安装
