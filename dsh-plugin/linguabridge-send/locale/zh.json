@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "LinguaBridge 发送翻译",
+    "description": "点一次就把输入框里的中文译成英文并发送，翻译由本机引擎完成。"
+  }
+}

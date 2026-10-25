@@ -1,0 +1,3 @@
+- insert:
+    - id: linguabridge-send
+      name: '@local/linguabridge-send'
