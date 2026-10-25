@@ -306,23 +306,34 @@ window.__ModuleLoader__.load({
 
         const measure = () => {
           const trackRect = track.getBoundingClientRect();
-          const card = track.closest('[data-composer-card]') ?? track.parentElement;
-          if (card === null || typeof card.getBoundingClientRect !== 'function') return;
-          const cardRect = card.getBoundingClientRect();
-          let leftLimit = cardRect.left + 8;
-          const first = card.firstElementChild;
-          if (
-            first !== null &&
-            first !== undefined &&
-            typeof first.getBoundingClientRect === 'function' &&
-            !first.contains(track)
-          ) {
-            const firstRect = first.getBoundingClientRect();
-            if (firstRect.width > 0) leftLimit = Math.max(leftLimit, firstRect.right + 8);
+          if (trackRect.width === 0 && trackRect.height === 0) return; // 还没布局
+
+          // 找"跨整行的工具行"：从 track 往上，第一个明显比我们这一组宽的祖先。
+          // 不能依赖 [data-composer-card]——该版本里取不到，回退到父节点会把起点
+          // 算在右侧小组的左边缘（实测就是红框那个位置）。
+          let row = track.parentElement;
+          while (row !== null && row !== document.documentElement) {
+            const rect = row.getBoundingClientRect();
+            if (rect.width > Math.max(360, trackRect.width * 1.5)) break;
+            row = row.parentElement;
           }
+
+          const rowRect = row !== null ? row.getBoundingClientRect() : null;
+          let leftLimit = rowRect !== null && rowRect.width > 0 ? rowRect.left + 8 : trackRect.left - 240;
+
+          // 工具行最左边那组是「完全权限 +」，从它右边再留 8px 起步。
+          const first = row !== null ? row.firstElementChild : null;
+          if (first !== null && first !== undefined && typeof first.getBoundingClientRect === 'function') {
+            const firstRect = first.getBoundingClientRect();
+            if (firstRect.width > 0 && firstRect.right < trackRect.left) {
+              leftLimit = Math.max(leftLimit, firstRect.right + 8);
+            }
+          }
+
           const distance = Math.floor(trackRect.left - leftLimit);
-          // 下限 120px：测量失败或空间过窄时也保证有可见位移
-          if (Number.isFinite(distance)) setTravel(Math.max(120, Math.min(800, distance)));
+          if (Number.isFinite(distance) && distance > 0) {
+            setTravel(Math.max(120, Math.min(900, distance)));
+          }
         };
 
         measure();

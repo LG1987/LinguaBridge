@@ -10,7 +10,8 @@
 
 - 插件忙碌态动画：`release/动画.txt` 里的 `.loading-326` 改写为 `lb-loader`。两个黄色方块在 `blur(5px) contrast(10)` 下粘合、绕网格循环位移，外面套 26px 白色容器隔离 `mix-blend-mode: darken`（否则深色主题下会变全黑）。
 - **动画常驻在按钮旁**：空闲时就停在「译」按钮左侧、同一行，持续运转。
-- 点击「译」后**立刻出现在最左端**（输入卡片最左侧、`+` 按钮之后，实测距离，下限 120px、上限 800px），随后用 **6s 匀速 keyframes** 滑回按钮旁，移动结束即收尾。
+- 点击「译」后**立刻出现在最左端**（工具行第一个控件「完全权限 +」之后 8px），随后用 **6s 匀速 keyframes** 滑回按钮旁，移动结束即收尾。
+- 起点测量改为"向上找到跨整行的工具行，取它第一个控件的右边缘"：该版本里 `[data-composer-card]` 取不到，回退到父节点会把起点算在右侧小组左边缘（实测偏到红框位置）。
 - 位移改用 `@keyframes lb-sweep` 而不是 `transition`：在同一帧里切换 `transition: none → 6s` 时浏览器经常不启动过渡，表现为"点击后完全没动"；keyframes 无此问题。
 - 动画 **2s 一圈无限循环**，无论停在哪都在转。
 - 忙碌态**固定展示 6 秒**；`submit()` 在等待之前就已调用，发送不被延迟。
@@ -24,7 +25,7 @@
 ### 产物
 
 - `LinguaBridge-extension-0.2.1.zip` — sha256 `6bd6843e6b636d12f543beeaace2e685874fb2ee63dff015fcdedd3d91df97bb`
-- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `eb02196505ee3b249740c6258c5b57e2235ad211a69916233569a8cd13dd171e`
+- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `01cf8bd9902cc0187a7bd721404c3ee12898aa9a084abd674ac66ab491d87a87`
 
 > 本版只产出本地包并入仓库；GitHub Release 仍停在 v0.2.0，待需要时再发布。浏览器扩展的动画留待后续版本。
 
