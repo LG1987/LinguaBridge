@@ -1,0 +1,26 @@
+# build output
+dist/
+release/
+.artifacts/
+
+# toolchains / caches kept inside the project
+.venv/
+.python/
+.uvtool/
+.uv-cache/
+.npm-cache/
+node_modules/
+.tmp/
+.logs/
+
+# downloaded models (≈140 MB) and their archives
+service/models/
+.tmp/model-downloads/
+
+# local engine logs / pid files
+*.log
+*.pid
+
+# python
+__pycache__/
+*.pyc

@@ -1,0 +1,26 @@
+{
+  "name": "linguabridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "LinguaBridge — local-first bilingual prompt layer for AI chat UIs (DSH first, ChatGPT next).",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:ps1": "pwsh -NoProfile -File scripts/build.ps1",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit",
+    "test": "node test/run.ts",
+    "test:live": "node test/integration.local.ts",
+    "test:corpus": "node test/corpus.local.ts",
+    "engine": "pwsh -NoProfile -File tools/start-engine.ps1 -Background",
+    "health": "pwsh -NoProfile -File tools/health-check.ps1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.6",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.3",
+    "typescript": "^7.0.2"
+  }
+}

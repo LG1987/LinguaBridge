@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "LinguaBridge",
+  "version": "0.0.0",
+  "description": "本地优先的中英双语输入层：先看原文与译文对比，确认后再写入输入框。DSH 优先，兼容 ChatGPT。",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "contextMenus", "activeTab"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "LinguaBridge — 检查本地翻译服务"
+  },
+  "commands": {
+    "translate-prompt": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+T",
+        "mac": "Command+Alt+T"
+      },
+      "description": "翻译当前输入框内容（原文/译文对比）"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://127.0.0.1/*",
+        "http://localhost/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

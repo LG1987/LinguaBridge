@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LinguaBridge 自测页 · DSH DOM 结构模拟</title>
+<!--
+  为什么有这一页：
+  DSH 桌面版的 Web UI 只接受 dsh web 打印的 ?token= 链接（换 cookie 后重定向），
+  Electron 窗口里也无法加载浏览器扩展。这一页复刻了 DSH 真实使用的 DOM 标记
+  （data-conversation-scroll / data-chat-anchor-key / data-composer-seat /
+  data-lexical-editor / data-slot / data-turn-tail），
+  只为在真实 Chrome 里验证扩展的交互层：面板、写入回读、IME、回复卡片。
+
+  用法：pwsh -File tools\mock-ui.ps1  然后打开打印出的地址。
+-->
+<style>
+  :root { color-scheme: dark; --bg:#0f1115; --panel:#171a21; --line:#262b36; --text:#e6e8ee; --muted:#9aa4b2; --accent:#7c8cff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { font-size:15px; margin:0 0 4px; }
+  header p { margin:0; color:var(--muted); font-size:12.5px; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; padding:10px 20px; border-bottom:1px solid var(--line); }
+  .toolbar button { font:inherit; font-size:12.5px; padding:6px 12px; border-radius:8px; border:1px solid var(--line); background:#1d2129; color:var(--text); cursor:pointer; }
+  .toolbar button:hover { border-color:var(--accent); }
+  main { max-width:820px; margin:0 auto; padding:20px 20px 180px; }
+  [data-conversation-scroll] { display:flex; flex-direction:column; gap:14px; }
+  [data-chat-anchor-key] { border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:var(--panel); }
+  [data-chat-anchor-key][data-chat-flow-kind="turn-tail"] { background:transparent; border-style:dashed; color:var(--muted); font-size:12px; padding:8px 12px; }
+  .mock_markdown h2 { font-size:16px; margin:0 0 8px; }
+  .mock_markdown p { margin:0 0 8px; }
+  .mock_markdown pre { background:#0b0d11; border:1px solid var(--line); border-radius:8px; padding:10px; overflow:auto; margin:0; }
+  .mock_markdown code { font-family: ui-monospace, Consolas, monospace; font-size:12.5px; }
+  [data-chat-anchor-key] button { font:inherit; font-size:12px; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:6px; padding:2px 8px; cursor:pointer; }
+  footer[data-composer-seat] { position:fixed; left:0; right:0; bottom:0; padding:12px 20px 16px; background:linear-gradient(180deg, transparent, var(--bg) 30%); }
+  [data-composer-card] { max-width:820px; margin:0 auto; display:flex; gap:10px; align-items:flex-end; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:10px 12px; }
+  [data-lexical-editor="true"] { flex:1; min-height:44px; max-height:160px; overflow:auto; outline:none; white-space:pre-wrap; word-break:break-word; padding:6px 4px; }
+  [data-lexical-editor="true"]:empty::before { content:"在这里输入中文提示词，按 Ctrl+Alt+T 或点右侧「译」…"; color:#5b6472; }
+  [data-composer-card] button[type="submit"] { font:inherit; font-size:13px; padding:8px 16px; border-radius:10px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+  .hint { max-width:820px; margin:8px auto 0; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>LinguaBridge 自测页</h1>
+  <p>复刻 DSH 的 DOM 标记，用于在真实浏览器里验证扩展。页面本身不会发送任何请求，所有翻译都来自你本机的 127.0.0.1:5000。</p>
+</header>
+
+<div class="toolbar">
+  <button id="fill-prompt" type="button">填入示例中文提示词</button>
+  <button id="add-reply" type="button">追加一条英文回复</button>
+  <button id="stream-reply" type="button">模拟流式回复</button>
+  <button id="clear-zh" type="button">清空输入框</button>
+</div>
+
+<main>
+  <div data-conversation-scroll>
+    <div data-chat-anchor-key="u1" data-chat-node-key="u1" data-chat-turn="1">
+      <div data-slot="conversation.chat.user.content">
+        <p>这是一条用户消息（中文）。扩展不应该把它当成回复去翻译。</p>
+      </div>
+    </div>
+
+    <div data-chat-anchor-key="a1" data-chat-node-key="a1" data-chat-turn="2">
+      <div class="mock_markdown">
+        <h2>What this page tests</h2>
+        <p>The extension should translate this English reply into Chinese and insert a collapsible card below it. The original text must stay untouched.</p>
+        <pre><code>const answer = 42;
+console.log(answer);</code></pre>
+      </div>
+      <button type="button">复制</button>
+    </div>
+
+    <div data-chat-anchor-key="t1" data-chat-node-key="t1" data-chat-flow-kind="turn-tail" data-turn-tail="2" data-chat-turn="2">
+      <div data-slot="conversation.chat.assistant-actions"><button type="button">重新生成</button></div>
+      <span>1.2k tokens</span>
+    </div>
+  </div>
+</main>
+
+<footer data-composer-seat>
+  <div data-composer-card>
+    <div contenteditable="true" data-lexical-editor="true" id="editor" role="textbox" aria-label="输入框"></div>
+    <button type="submit" aria-label="发送">发送</button>
+  </div>
+</footer>
+<p class="hint">提示：页面加载约 2 秒后，上面那条英文回复下方应自动出现「本地译文」卡片（可折叠/复制）。</p>
+
+<script>
+  // 明确的示例提示词：包含代码、行内代码、路径和约束词，便于肉眼核对格式保护。
+  const SAMPLE = [
+    "必须保留下面代码的缩进和函数名，不要改写实现，只补充注释。",
+    "```ts",
+    "export function add(a: number, b: number): number {",
+    "  return a + b;",
+    "}",
+    "```",
+    "完成后运行 `npm test`，并把结果写到 C:\\work\\report.md。",
+  ].join("\n");
+
+  const editor = document.getElementById("editor");
+  const scroll = document.querySelector("[data-conversation-scroll]");
+  let turn = 2;
+  let counter = 1;
+
+  document.getElementById("fill-prompt").addEventListener("click", () => {
+    editor.textContent = SAMPLE;
+    editor.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: SAMPLE }));
+    editor.focus();
+  });
+
+  document.getElementById("clear-zh").addEventListener("click", () => {
+    editor.textContent = "";
+    editor.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "deleteContentBackward" }));
+  });
+
+  function appendAssistantRow(text) {
+    turn += 1;
+    const row = document.createElement("div");
+    row.dataset.chatAnchorKey = `a-auto-${counter}`;
+    row.dataset.chatNodeKey = `a-auto-${counter}`;
+    row.dataset.chatTurn = String(turn);
+    counter += 1;
+    const body = document.createElement("div");
+    body.className = "mock_markdown";
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    body.append(paragraph);
+    row.append(body);
+    const tail = document.querySelector('[data-chat-flow-kind="turn-tail"]');
+    if (tail) scroll.insertBefore(row, tail);
+    else scroll.append(row);
+    return row;
+  }
+
+  document.getElementById("add-reply").addEventListener("click", () => {
+    appendAssistantRow(
+      "A closure captures variables from its defining scope. Keep the function pure and avoid mutating the outer array.",
+    );
+  });
+
+  document.getElementById("stream-reply").addEventListener("click", () => {
+    const paragraphs = [
+      "Streaming replies mutate the DOM many times per second.",
+      " The extension should wait until the text stops changing, then insert exactly one translation card.",
+      " If a new fragment arrives, the card is replaced rather than duplicated.",
+    ];
+    const row = appendAssistantRow("");
+    const body = row.querySelector("p");
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index >= paragraphs.length) {
+        clearInterval(timer);
+        return;
+      }
+      body.textContent += paragraphs[index];
+      index += 1;
+    }, 400);
+  });
+
+  // 让自测页也走真实的发送路径：拦截后只做提示，不真的发请求。
+  document.querySelector('[data-composer-card] button[type="submit"]').addEventListener("click", () => {
+    const text = editor.textContent || "";
+    console.log("[mock] send clicked, length =", text.length);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "description": "LinguaBridge 回归语料：覆盖代码块、行内代码、链接、路径、命令、约束词、否定与长提示词。用于人工验收和 tools/corpus check 自动化。",
+  "prompts": [
+    {
+      "id": "plain-001",
+      "category": "plain",
+      "text": "请解释一下什么是幂等性，并给出一个日常生活中的类比。"
+    },
+    {
+      "id": "plain-002",
+      "category": "plain",
+      "text": "帮我把下面这段产品说明改写成更简洁的版本，保留所有数字。"
+    },
+    {
+      "id": "code-001",
+      "category": "code",
+      "text": "请检查这段 TypeScript 代码有没有类型问题：\n```ts\nexport function add(a: number, b: number): number {\n  return a + b;\n}\n```\n说明每个参数的作用。"
+    },
+    {
+      "id": "code-002",
+      "category": "code",
+      "text": "下面这个 Python 函数为什么会抛出 KeyError？请给出修复后的代码。\n```python\ndef get_name(users, uid):\n    return users[uid][\"name\"]\n```"
+    },
+    {
+      "id": "code-003",
+      "category": "code",
+      "text": "把这段 SQL 改成使用窗口函数，结果列保持不变。\n```sql\nSELECT user_id, MAX(created_at) FROM orders GROUP BY user_id;\n```"
+    },
+    {
+      "id": "inline-001",
+      "category": "inline-code",
+      "text": "运行 `npm test` 之后，如果 `auth.spec.ts` 失败，请先看 `dist` 目录是否是最新的。"
+    },
+    {
+      "id": "inline-002",
+      "category": "inline-code",
+      "text": "把 `getUserById` 改名为 `findUserById`，并同步所有 `import` 语句。"
+    },
+    {
+      "id": "url-001",
+      "category": "url",
+      "text": "参考 https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API 和 https://example.com/spec 这两个文档，总结 fetch 的错误处理方式。"
+    },
+    {
+      "id": "email-001",
+      "category": "email",
+      "text": "把结论整理成一封邮件，发给 zhangsan@example.com 并抄送 team-leads@example.com。"
+    },
+    {
+      "id": "path-001",
+      "category": "path",
+      "text": "把生成的文件写到 C:\\work\\reports\\weekly.md，同时更新 D:\\data\\cache\\index.json 里的时间戳。"
+    },
+    {
+      "id": "path-002",
+      "category": "path",
+      "text": "检查 src/core/provider.ts 和 src/content/index.ts 里是否有未使用的导入。"
+    },
+    {
+      "id": "cmd-001",
+      "category": "command",
+      "text": "先执行 git status 看有没有未提交的改动，再运行 pnpm build --filter web 验证构建。"
+    },
+    {
+      "id": "cmd-002",
+      "category": "command",
+      "text": "用 docker run -p 8080:80 nginx 启动一个测试服务，然后 curl http://127.0.0.1:8080 确认可以访问。"
+    },
+    {
+      "id": "env-001",
+      "category": "env-var",
+      "text": "在启动脚本里设置 $env:NODE_ENV 为 production，并确认 %PATH% 里包含 Node 的安装目录。"
+    },
+    {
+      "id": "template-001",
+      "category": "template",
+      "text": "把模板里的 {{userName}} 和 {{orderId}} 替换成真实数据，其他占位符不要动。"
+    },
+    {
+      "id": "constraint-must-001",
+      "category": "constraint",
+      "text": "必须使用 async/await 重写这个函数，不允许保留回调写法。"
+    },
+    {
+      "id": "constraint-mustnot-001",
+      "category": "constraint",
+      "text": "重构时可以调整内部结构，但不得修改任何对外导出的函数签名。"
+    },
+    {
+      "id": "constraint-only-001",
+      "category": "constraint",
+      "text": "只输出最终的 JSON 结果，不要解释，也不要加 Markdown 代码块标记。"
+    },
+    {
+      "id": "constraint-bounds-001",
+      "category": "constraint",
+      "text": "用不超过 200 字总结这篇文章，至少包含三个关键结论。"
+    },
+    {
+      "id": "constraint-conditional-001",
+      "category": "constraint",
+      "text": "如果接口返回 429，就退避重试；否则直接返回结果，不要重试。"
+    },
+    {
+      "id": "constraint-preserve-001",
+      "category": "constraint",
+      "text": "保持现有的缩进和空行不变，只改动第 12 行的逻辑。"
+    },
+    {
+      "id": "constraint-steps-001",
+      "category": "constraint",
+      "text": "请一步一步地排查这个内存泄漏，每一步都说明你的假设和验证方式。"
+    },
+    {
+      "id": "constraint-language-001",
+      "category": "constraint",
+      "text": "分析完成后用中文回答，代码注释保持英文。"
+    },
+    {
+      "id": "constraint-format-001",
+      "category": "constraint",
+      "text": "把结果整理成 Markdown 表格，列分别是：指标、当前值、目标值。"
+    },
+    {
+      "id": "negation-001",
+      "category": "negation",
+      "text": "不要引入新的依赖，也不要把同步函数改成异步的，更不要删除现有的测试用例。"
+    },
+    {
+      "id": "mixed-001",
+      "category": "mixed",
+      "text": "必须保留 `npm test` 之后生成的报告，不要覆盖 C:\\work\\report.md。完成后把摘要发到 qa@example.com，并把结果写入 summary.json。"
+    },
+    {
+      "id": "mixed-002",
+      "category": "mixed",
+      "text": "帮我审阅这个 PR：主要看错误处理是否正确，日志是否泄露敏感信息。\n```ts\ntry {\n  await fetch(url);\n} catch (error) {\n  console.log(apiKey, error);\n}\n```\n只指出问题，不要直接改代码。"
+    },
+    {
+      "id": "long-001",
+      "category": "long",
+      "text": "我们正在把一个单体应用迁移到微服务，现在遇到几个问题：第一，跨服务的事务一致性很难保证；第二，日志分散在多个服务里，排查问题很慢；第三，接口版本管理比较混乱。请你从数据一致性、可观测性和版本治理三个方面给出建议，每条建议都要说明成本和风险，并指出在小团队里最值得先做的一件事。"
+    },
+    {
+      "id": "regex-001",
+      "category": "code",
+      "text": "写一个正则，匹配合法的 IPv4 地址，并解释为什么不能只用 `\\d{1,3}` 三段。"
+    },
+    {
+      "id": "unclosed-001",
+      "category": "code",
+      "text": "下面这段代码没有写完整，请补全错误处理部分。\n```ts\nasync function loadConfig() {\n  const text = await readFile(path);"
+    },
+    {
+      "id": "code-only-001",
+      "category": "skip",
+      "text": "```rust\nfn main() {\n    println!(\"hello\");\n}\n```",
+      "expectSkipped": true
+    },
+    {
+      "id": "english-only-001",
+      "category": "skip",
+      "text": "Refactor this function to avoid the nested ternary and keep the public API stable.",
+      "expectSkipped": true
+    },
+    {
+      "id": "response-en-001",
+      "category": "response",
+      "direction": "en->zh",
+      "text": "The bug comes from mutating the array while iterating over it. Build a new array with `map` instead, and avoid `splice` inside the loop."
+    },
+    {
+      "id": "response-en-002",
+      "category": "response",
+      "direction": "en->zh",
+      "text": "1. Parse the config at startup.\n2. Validate required fields.\n3. Fail fast with a clear error message.\n\nDo not fall back to silent defaults."
+    }
+  ]
+}
