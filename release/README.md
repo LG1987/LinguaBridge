@@ -21,7 +21,7 @@ LinguaBridge-<component>-<version>.json   # 同名元数据：逐文件/整包 S
 | 文件 | 大小 | SHA-256 | 内容 |
 |------|------|---------|------|
 | `LinguaBridge-extension-0.2.1.zip` | 24.1 KB | `6bd6843e…97bb` | 扩展：`manifest.json` + `background.js` + `content.js`（已排除 sourcemap） |
-| `LinguaBridge-dsh-plugin-0.2.1.zip` | 9.1 KB | `244b513a…7bac` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
+| `LinguaBridge-dsh-plugin-0.2.1.zip` | 9.2 KB | `028374ad…8fa3` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
 | 同名 `.json` | — | — | 构建时间、逐文件与整包 SHA-256、安装说明 |
 
 上一版仍保留：`LinguaBridge-extension-0.2.0.zip`、`LinguaBridge-dsh-plugin-0.2.0.zip`（0.2.0 的插件包不含翻译动画）。

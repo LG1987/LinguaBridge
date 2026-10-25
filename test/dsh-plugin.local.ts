@@ -216,12 +216,12 @@ describe("dsh plugin · 译并发送", () => {
 
     (button?.props["onClick"] as () => void)();
 
-    // The loader is always mounted and parked to the far left while idle.
+    // The loader is always mounted and parked at the leftmost safe spot while idle.
     const idleLoader = findByClass(tree, "lb-loader-inline");
     assert.ok(idleLoader !== null, "the loader must always be rendered, not only while busy");
     assert.ok(
-      String(idleLoader?.props["className"]).includes("lb-loader-paused"),
-      "the idle loader must have its animation paused",
+      !String(idleLoader?.props["className"]).includes("paused"),
+      "the animation must keep running regardless of position",
     );
     assert.ok(
       String((idleLoader?.props["style"] as Record<string, unknown>)["transform"]).startsWith("translateX(-"),
@@ -234,10 +234,6 @@ describe("dsh plugin · 译并发送", () => {
     const busyTree = harness.render(draftState, actions);
     const busyLoader = findByClass(busyTree, "lb-loader-inline");
     assert.ok(busyLoader !== null, "the inline loader must be present while translating");
-    assert.ok(
-      !String(busyLoader?.props["className"]).includes("lb-loader-paused"),
-      "the busy loader must run its animation",
-    );
     assert.equal(
       (busyLoader?.props["style"] as Record<string, unknown>)["transform"],
       "translateX(0px)",
@@ -258,8 +254,8 @@ describe("dsh plugin · 译并发送", () => {
     const css = String((styleElement?.props["children"] as unknown[])[0] ?? "");
     assert.ok(css.includes("@keyframes lb-loader"), "loader keyframes must be present");
     assert.ok(!css.includes("position: fixed"), "the loader must be inline, not a floating overlay");
-    assert.ok(css.includes("lb-loader 2s 3"), "the animation must run three 2s turns (6s total)");
-    assert.ok(!css.includes("infinite"), "the animation must stop after three turns");
+    assert.ok(css.includes("lb-loader 2s infinite"), "the animation must run continuously");
+    assert.ok(css.includes("transform 6s linear"), "the travel must take six seconds at constant speed");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {
