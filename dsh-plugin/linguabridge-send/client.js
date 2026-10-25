@@ -20,9 +20,9 @@ window.__ModuleLoader__.load({
 
     const DEFAULT_ENDPOINT = 'http://127.0.0.1:5000';
     const TIMEOUT_MS = 20000;
-    // 本机翻译常常只要 300–600 ms，动画会一闪而过；忙碌态改为固定至少显示 3 秒。
-    // 注意：submit() 在等待之前就已调用，所以这只影响"已发送"状态的呈现，不拖慢发送。
-    const MIN_LOADER_MS = 3000;
+    // 动画 2s 一圈、转三圈共 6s；翻译通常先完成，完成后继续展示到满 6s 再收。
+    // submit() 在等待之前就已调用，所以这只影响"已发送"状态的呈现，不拖慢发送。
+    const MIN_LOADER_MS = 6000;
 
     // ---------------------------------------------------------------- 格式保护
 
@@ -233,10 +233,10 @@ window.__ModuleLoader__.load({
       .lb-loader:before, .lb-loader:after {
         content: ""; grid-area: 1/1; width: 40px; height: 40px;
         background: #ffff00;
-        /* 3 秒内正好转三圈：1s × 3 次，播完即停 */
-        animation: lb-loader 1s 3;
+        /* 2s 一圈 × 3 圈 = 6s，播完即停 */
+        animation: lb-loader 2s 3;
       }
-      .lb-loader:after { animation-delay: -0.5s; }
+      .lb-loader:after { animation-delay: -1s; }
       @keyframes lb-loader {
         0%   { transform: translate(0, 0); }
         25%  { transform: translate(100%, 0); }

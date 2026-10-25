@@ -13,13 +13,13 @@
 
 ### 变更
 
-- 忙碌态**固定至少显示 3 秒**——本机翻译常只要 300–600 ms，否则动画一闪而过像没反应；`submit()` 在等待之前就已调用，发送不被延迟。
-- 动画**在 3 秒内正好转三圈**（`animation: lb-loader 1s 3`），播完即停，不再无限循环；`prefers-reduced-motion` 下改为静态。
+- 忙碌态**固定展示 6 秒**——翻译通常先完成，完成后动画继续展示到满 6 秒再收；`submit()` 在等待之前就已调用，发送不被延迟。
+- 动画 **2s 一圈 × 3 圈 = 6s**，播完即停，不再无限循环；`prefers-reduced-motion` 下改为静态。
 
 ### 产物
 
 - `LinguaBridge-extension-0.2.1.zip` — sha256 `6bd6843e6b636d12f543beeaace2e685874fb2ee63dff015fcdedd3d91df97bb`
-- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `80ed09c2c9ced8ec05f5f600afc2e3e01676f732cdbb3a088dab47949adc1af1`
+- `LinguaBridge-dsh-plugin-0.2.1.zip` — sha256 `b91930156a092729305ba9f670bdfbe1d99c3c7f15704ee7838bd139bd9eb3c2`
 
 > 本版只产出本地包并入仓库；GitHub Release 仍停在 v0.2.0，待需要时再发布。浏览器扩展的动画留待后续版本。
 
