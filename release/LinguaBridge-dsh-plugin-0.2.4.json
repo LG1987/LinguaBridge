@@ -1,0 +1,48 @@
+{
+  "name": "@local/linguabridge-send",
+  "component": "dsh-plugin",
+  "version": "0.2.4",
+  "kind": "dsh-cordis-bundle",
+  "builtAt": "2026-10-25T11:54:32.2533006-06:00",
+  "files": [
+    {
+      "path": "client.js",
+      "bytes": 18802,
+      "sha256": "61703751234aba49cccd0e49c8653d928548fff4b1b00dde89e0ae38537982b0"
+    },
+    {
+      "path": "cordis.patch.yml",
+      "bytes": 77,
+      "sha256": "de58cdeb78df3258f2e14ab006b9130d56be3851583d857336c0f8ec19984f2d"
+    },
+    {
+      "path": "icon.svg",
+      "bytes": 581,
+      "sha256": "0e4c0a8ddcf02f8fd758e03405a8bba40bd860ed888816bc266a719b246dafe6"
+    },
+    {
+      "path": "index.js",
+      "bytes": 367,
+      "sha256": "2b5bea321edd213a658b7135f0aac311295c4f61932980ebbe15a26bca68fca4"
+    },
+    {
+      "path": "package.json",
+      "bytes": 739,
+      "sha256": "c1004e70a0709056b8c49ee0eec06d2005c31191e9dacea14ec85c39fc2e7531"
+    },
+    {
+      "path": "locale/en.json",
+      "bytes": 167,
+      "sha256": "0e4ab93a9a66c1c5ced9e9efab583fad9db2f85a303ddf948381a312241b8797"
+    },
+    {
+      "path": "locale/zh.json",
+      "bytes": 174,
+      "sha256": "3343c3f640bcf7a0ef7f681bdecc32153c080ab2b7844a8f5673216af5f39b30"
+    }
+  ],
+  "totalBytes": 20907,
+  "archiveBytes": 9990,
+  "archiveSha256": "6fa08e7561ade798c9907511b01e4f6a872aaab5b809695bd137cf82525e489d",
+  "installTarget": "解压后把 LinguaBridge-dsh-plugin-0.2.4 目录作为 plugin_manager install_bundle 的 target"
+}

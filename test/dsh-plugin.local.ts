@@ -279,6 +279,9 @@ describe("dsh plugin · 译并发送", () => {
     assert.ok(css.includes("lb-loader 2s infinite"), "the animation must run continuously");
     assert.ok(css.includes("@keyframes lb-sweep"), "the travel must be a keyframe animation, not a transition");
     assert.ok(css.includes("lb-sweep 6s linear"), "the travel must take six seconds at constant speed");
+    // '#ffff00' (the blocks) must not be mistaken for a white plate, hence the ';'.
+    assert.ok(!css.includes("background: #fff;"), "the loader must not paint a white plate behind the blocks");
+    assert.ok(!css.includes("mix-blend-mode"), "no backdrop blending is allowed without a plate");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {

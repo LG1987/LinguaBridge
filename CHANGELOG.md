@@ -2,6 +2,21 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。当前只发布扩展（服务为源码形式，随仓库更新）。
 
+## [0.2.4] — 2026-10-25
+
+当前最新版。加载动画**去掉白色底板**，只显示两个方块本身。
+
+### 变更
+
+- `.lb-loader` 与 `.lb-loader-inline` 的 `background: #fff` 与内阴影全部移除，改为透明；只保留两个黄色方块的运动。
+- 移除 `mix-blend-mode: darken`：它依赖白色背景，透明底上会把整块压暗。`blur(5px) contrast(10) hue-rotate(300deg)` 保留，"粘合"观感不变。
+- 测试新增守卫：样式里不得出现 `background: #fff;` 或任何 `mix-blend-mode`。
+
+### 产物
+
+- `LinguaBridge-extension-0.2.4.zip` — sha256 `42f1d7f3ba44e2dcd77a6774500e39d72ccf74c38560aeb7f7add78af65790c7`
+- `LinguaBridge-dsh-plugin-0.2.4.zip` — sha256 `6fa08e7561ade798c9907511b01e4f6a872aaab5b809695bd137cf82525e489d`
+
 ## [0.2.3] — 2026-10-25
 
 当前最新版。**撤销回车触发**：需求方明确只有「译」按钮可以触发翻译发送。

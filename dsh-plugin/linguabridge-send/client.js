@@ -222,13 +222,15 @@ window.__ModuleLoader__.load({
 
     // 来自 release/动画.txt：两个黄色方块在 100×100 网格里循环位移，
     // 父级用 blur(5px) contrast(10) 把两块"粘"在一起，再 hue-rotate 上色。
-    // 外层 .lb-loader-box 提供白色底，避免 mix-blend-mode:darken 在深色主题下变黑。
+    // 现在是透明底：不再画白色底板，也不再做背景混合，只留方块本身。
     const LOADER_CSS = `
       .lb-loader {
         width: 100px; aspect-ratio: 1; padding: 10px; box-sizing: border-box;
-        display: grid; background: #fff;
+        display: grid;
+        /* 去掉白色底板：只保留两个黄色方块本身。
+           也不再做背景混合——它依赖白色背景，透明底上会把整块压暗。 */
+        background: transparent;
         filter: blur(5px) contrast(10) hue-rotate(300deg);
-        mix-blend-mode: darken;
       }
       .lb-loader:before, .lb-loader:after {
         content: ""; grid-area: 1/1; width: 40px; height: 40px;
@@ -253,8 +255,8 @@ window.__ModuleLoader__.load({
       .lb-loader-inline {
         position: absolute; inset: 0;
         display: inline-flex; align-items: center; justify-content: center;
-        overflow: hidden; border-radius: 6px; background: #fff;
-        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        overflow: hidden; border-radius: 6px;
+        background: transparent;
         will-change: transform;
       }
       /* 位移用 keyframes 而不是 transition：

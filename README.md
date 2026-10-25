@@ -4,7 +4,7 @@
 
 DSH（DeepSeek Harness）优先适配，兼容 ChatGPT。
 
-**当前版本：v0.2.3**（最新）— 插件触发方式只有「译」按钮（撤销了 0.2.2 的 Enter 接管）；动画常驻 + 6s 滑动。v0.2.0 引入 **DSH 原生插件「译并发送」**；扩展与引擎行为不变。变更记录见 [CHANGELOG.md](CHANGELOG.md)，版本定义见 [docs/releases/](docs/releases/)。
+**当前版本：v0.2.4**（最新）— 插件触发方式只有「译」按钮（撤销了 0.2.2 的 Enter 接管）；动画常驻、去掉白色底板、6s 滑动。v0.2.0 引入 **DSH 原生插件「译并发送」**；扩展与引擎行为不变。变更记录见 [CHANGELOG.md](CHANGELOG.md)，版本定义见 [docs/releases/](docs/releases/)。
 
 **两种交付形态**
 
