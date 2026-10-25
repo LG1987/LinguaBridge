@@ -282,6 +282,8 @@ describe("dsh plugin · 译并发送", () => {
     // '#ffff00' (the blocks) must not be mistaken for a white plate, hence the ';'.
     assert.ok(!css.includes("background: #fff;"), "the loader must not paint a white plate behind the blocks");
     assert.ok(!css.includes("mix-blend-mode"), "no backdrop blending is allowed without a plate");
+    assert.ok(css.includes("#d97757"), "the blocks must use the colour sampled from the reference image");
+    assert.ok(!css.includes("hue-rotate"), "hue rotation would shift the requested colour");
 
     const deadline = Date.now() + 30_000;
     while (!submitted && Date.now() < deadline) {

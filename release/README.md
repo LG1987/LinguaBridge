@@ -16,17 +16,17 @@ LinguaBridge-<component>-<version>.json   # 同名元数据：逐文件/整包 S
 
 > v0.1.0 的历史产物保留原名 `LinguaBridge-0.1.0.zip`，对应 tag `v0.1.0`，未重命名。
 
-## 当前产物（v0.2.4）
+## 当前产物（v0.2.5）
 
 | 文件 | 大小 | SHA-256 | 内容 |
 |------|------|---------|------|
-| `LinguaBridge-extension-0.2.4.zip` | 24 KB | `42f1d7f3…90c7` | 扩展：`manifest.json` + `background.js` + `content.js`（已排除 sourcemap） |
-| `LinguaBridge-dsh-plugin-0.2.4.zip` | 9.8 KB | `6fa08e75…489d` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
+| `LinguaBridge-extension-0.2.5.zip` | 24 KB | `9163f981…fdf32` | 扩展：`manifest.json` + `background.js` + `content.js`（已排除 sourcemap） |
+| `LinguaBridge-dsh-plugin-0.2.5.zip` | 9.9 KB | `8cf91d17…c9e5` | 插件：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`locale/{en,zh}.json`、`icon.svg` |
 | 同名 `.json` | — | — | 构建时间、逐文件与整包 SHA-256、安装说明 |
 
-> v0.2.4：动画去掉白色底板，只显示方块；v0.2.3 起只有「译」按钮可触发。
+> v0.2.5：动画改用参考图取样的 `#d97757` / `#b9603f`；v0.2.4 去掉白底；v0.2.3 起只有「译」按钮可触发。
 
-上一版仍保留：`LinguaBridge-*-0.2.3.zip`、`-0.2.2.zip`、`-0.2.1.zip`、`-0.2.0.zip`。
+上一版仍保留：`LinguaBridge-*-0.2.4.zip`、`-0.2.3.zip`、`-0.2.2.zip`、`-0.2.1.zip`、`-0.2.0.zip`。
 首版：`LinguaBridge-0.1.0.zip`（tag `v0.1.0` 指向它，未重命名）。
 
 整包哈希以各自 `.json` 的 `archiveSha256` 为准；重新打包会更新。

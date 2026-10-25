@@ -227,18 +227,24 @@ window.__ModuleLoader__.load({
       .lb-loader {
         width: 100px; aspect-ratio: 1; padding: 10px; box-sizing: border-box;
         display: grid;
-        /* 去掉白色底板：只保留两个黄色方块本身。
+        /* 去掉白色底板：只保留两个方块本身。
            也不再做背景混合——它依赖白色背景，透明底上会把整块压暗。 */
         background: transparent;
-        filter: blur(5px) contrast(10) hue-rotate(300deg);
+        /* 颜色按使用者给的参考图取：#d97757 / #b9603f。
+           为保住这个颜色，不再旋转色相，并把对比度收到 1.15——
+           原始 contrast(10) 会把任何颜色推到饱和极值。 */
+        filter: blur(5px) contrast(1.15);
       }
       .lb-loader:before, .lb-loader:after {
         content: ""; grid-area: 1/1; width: 40px; height: 40px;
-        background: #ffff00;
+        background: #d97757;
         /* 始终运行，不随位置改变而暂停 */
         animation: lb-loader 2s infinite;
       }
-      .lb-loader:after { animation-delay: -1s; }
+      .lb-loader:after {
+        background: #b9603f;
+        animation-delay: -1s;
+      }
       @keyframes lb-loader {
         0%   { transform: translate(0, 0); }
         25%  { transform: translate(100%, 0); }
