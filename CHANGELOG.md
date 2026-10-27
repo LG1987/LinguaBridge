@@ -2,6 +2,35 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。当前只发布扩展（服务为源码形式，随仓库更新）。
 
+## [0.3.0] — 2026-10-25
+
+当前最新版。**GLM-4-Flash 为主翻译引擎，本地 Argos 降级保底**——翻译质量问题的正解（方案设计见 [docs/plan-free-hybrid.md](docs/plan-free-hybrid.md)）。
+
+### 新增
+
+- `service/gateway.py`：翻译网关。GLM-4-Flash（OpenAI 兼容，`open.bigmodel.cn`）优先，输出经质量闸门校验，失败自动降级到本地 Argos；全挂才报错。
+- `service/quality.py`：质量闸门（全本地可算）——空译文、未翻译、中文残留、长度比上下限、复读检测。
+- 响应新增 `provider`（glm:glm-4-flash / argos-local / passthrough）与 `cached` 字段；`/health` 新增 `providers` 列表。
+- 同语言直接放行（英文→英文不再过引擎，`provider: passthrough`）。
+- GLM 的 system prompt 明确要求：只输出译文、保持行数、数字/标识符/路径/代码逐字保留、**禁止总结改写漏译**。
+
+### 变更
+
+- `service/server.py` 改为经网关路由；`VERSION` 升至 `0.3.0`。
+- key 配置：环境变量 `LB_LLM_KEY` 优先，其次 `service/providers.local.json`（**已加入 .gitignore，永不入库**）；`LB_OFFLINE=1` 强制离线（纯 Argos）。
+- README 产品定位更新：默认本地 + 可选在线增强（显式配置 key 才启用）。
+
+### 实测（用户报错的原句）
+
+`好了，把这个作为最新版，推送到库里。`
+- Argos：`Okay, let's get this up to speed.`（丢失"最新版/推送/库"，习语化）❌
+- GLM-4-Flash：`OK, treat this as the latest version and push it to the repository.` ✅
+
+### 产物
+
+- `LinguaBridge-extension-0.3.0.zip` — sha256 `3b70bc75bac7650650913cdeff220d46e4f774697fdb8e77c89564466f879d6f`
+- `LinguaBridge-dsh-plugin-0.3.0.zip` — sha256 `86cbdb46806665c1f5c1957a724484a917285a558a202fa50d0f33f5f98c0298`
+
 ## [0.2.5] — 2026-10-25
 
 当前最新版。加载动画改用参考图的橙色系。

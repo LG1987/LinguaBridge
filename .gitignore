@@ -24,6 +24,9 @@ service/models/
 *.log
 *.pid
 
+# provider secrets (GLM api key etc.) — never commit
+service/providers.local.json
+
 # python
 __pycache__/
 *.pyc

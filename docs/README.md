@@ -6,8 +6,9 @@
 | [architecture.md](architecture.md) | 实际实现的架构、模块职责、关键决策，以及**与方案的每一处偏离及实测证据** | 随代码演进 |
 | [acceptance.md](acceptance.md) | 可复现的验收步骤、期望输出、逐项检查清单、问题回报模板 | 每次发版更新证据 |
 | [requirement-changes.md](requirement-changes.md) | 对基线方案的正式变更（RC 编号）、影响与实现约束；RC-001 发送即翻译、RC-002 回车触发（已撤销） | 需求变更时追加 |
-| [releases/v0.2.5.md](releases/v0.2.5.md) | v0.2.5（当前最新）的版本定义、改动方案、证据与回滚 | 每次发版新增一份 |
-| [../release/README.md](../release/README.md) | 可分发软件包（v0.1.0）的清单、功能说明、安装与校验方法 | 每次打包更新 |
+| [plan-free-hybrid.md](plan-free-hybrid.md) | 翻译质量方案：本地网关 + 免费 LLM/MT 分层降级 + 质量闸门（v0.3.0 已落地其 GLM+保底子集） | 随方案演进 |
+| [releases/v0.3.0.md](releases/v0.3.0.md) | v0.3.0（当前最新）的版本定义、改动方案、证据与回滚 | 每次发版新增一份 |
+| [../release/README.md](../release/README.md) | 可分发软件包的清单、功能说明、安装与校验方法 | 每次打包更新 |
 | [../README.md](../README.md) | 面向使用者的快速开始、配置、已知限制、排障 | 随版本更新 |
 | [../CHANGELOG.md](../CHANGELOG.md) | 版本变更记录 | 每次发版 |
 

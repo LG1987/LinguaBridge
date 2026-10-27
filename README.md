@@ -1,10 +1,10 @@
 # LinguaBridge
 
-本地优先的中英双语输入层：把中文提示词翻译成英文，**先看原文与译文对比，再决定是否写入输入框**；同时把 AI 的英文回复翻译成中文，作为独立卡片插在回复下方。全程只访问 `127.0.0.1`，不调用任何付费 API。
+本地优先的中英双语输入层：把中文提示词翻译成英文，**先看原文与译文对比，再决定是否写入输入框**；同时把 AI 的英文回复翻译成中文，作为独立卡片插在回复下方。翻译默认走本机引擎 + 可选的免费在线增强（GLM-4-Flash），不调用任何付费 API。
 
 DSH（DeepSeek Harness）优先适配，兼容 ChatGPT。
 
-**当前版本：v0.2.5**（最新）— 插件触发方式只有「译」按钮（撤销了 0.2.2 的 Enter 接管）；动画常驻、无底板、`#d97757` 配色、6s 滑动。v0.2.0 引入 **DSH 原生插件「译并发送」**；扩展与引擎行为不变。变更记录见 [CHANGELOG.md](CHANGELOG.md)，版本定义见 [docs/releases/](docs/releases/)。
+**当前版本：v0.3.0**（最新）— **GLM-4-Flash 主翻译，本地 Argos 保底**（密钥放本地配置不入库，`LB_OFFLINE=1` 强制离线）；插件触发方式只有「译」按钮；动画常驻、无底板、`#d97757` 配色、6s 滑动。变更记录见 [CHANGELOG.md](CHANGELOG.md)，版本定义见 [docs/releases/](docs/releases/)，质量方案见 [docs/plan-free-hybrid.md](docs/plan-free-hybrid.md)。
 
 **两种交付形态**
 

@@ -25,10 +25,42 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from engine import Engine, ModelMissingError, UnsupportedLanguageError, detect_language
+from gateway import Gateway, GlmProvider, LocalProvider
 
-VERSION = "0.1.0"
+VERSION = "0.3.0"
 STARTED_AT = time.time()
 MAX_BODY_BYTES = 4 * 1024 * 1024
+
+
+def load_provider_config() -> dict[str, Any]:
+    """GLM 的 key / model / base_url：环境变量优先，其次 providers.local.json（不入库）。"""
+    config: dict[str, Any] = {}
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "providers.local.json")
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r", encoding="utf-8") as handle:
+                loaded = json.load(handle)
+            if isinstance(loaded, dict):
+                config = loaded
+        except (OSError, json.JSONDecodeError) as error:
+            sys.stderr.write(f"providers.local.json ignored: {error}\n")
+
+    config["glm_api_key"] = os.environ.get("LB_LLM_KEY") or config.get("glm_api_key", "")
+    return config
+
+
+def build_gateway(engine: Engine, config: dict[str, Any]) -> Gateway:
+    providers: list[Any] = []
+    if config.get("glm_api_key"):
+        providers.append(
+            GlmProvider(
+                base_url=str(config.get("glm_base_url") or "https://open.bigmodel.cn/api/paas/v4"),
+                api_key=str(config["glm_api_key"]),
+                model=str(config.get("glm_model") or "glm-4-flash"),
+            )
+        )
+    providers.append(LocalProvider(engine))
+    return Gateway(providers)
 
 
 class ApiError(Exception):
@@ -43,6 +75,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
     engine: Engine  # injected by create_server
+    gateway: Gateway  # injected by create_server
 
     # ---- plumbing --------------------------------------------------
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
@@ -153,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(target, str) or target.strip() == "":
             raise ApiError(HTTPStatus.BAD_REQUEST, "target language is required")
 
-        translation, detected = self.engine.translate(text, source=source, target=target)
+        translation, provider_name, cached = self.gateway.translate(text, source=source, target=target)
         if translation.strip() == "" and text.strip() != "":
             raise ApiError(HTTPStatus.INTERNAL_SERVER_ERROR, "engine returned an empty translation")
 
@@ -161,9 +194,17 @@ class Handler(BaseHTTPRequestHandler):
             HTTPStatus.OK,
             {
                 "translatedText": translation,
-                "detectedLanguage": {"language": detected, "confidence": 90 if detected else 0},
+                "detectedLanguage": {"language": self._detected(text, source), "confidence": 90},
+                "provider": provider_name,
+                "cached": cached,
             },
         )
+
+    @staticmethod
+    def _detected(text: str, source: str) -> str:
+        if source not in ("auto", "", None):
+            return source
+        return detect_language(text)[0]
 
     def _handle_detect(self, payload: dict[str, Any]) -> None:
         text = payload.get("q")
@@ -179,13 +220,14 @@ class Handler(BaseHTTPRequestHandler):
             "version": VERSION,
             "engine": "argos-ctranslate2",
             "models": pairs,
+            "providers": [provider.name for provider in self.gateway.providers if provider.available()],
             "uptimeSeconds": round(time.time() - STARTED_AT, 1),
             "loaded": sorted(self.engine._bundles.keys()),  # noqa: SLF001 - simple status
         }
 
 
-def create_server(host: str, port: int, engine: Engine) -> ThreadingHTTPServer:
-    handler = type("BoundHandler", (Handler,), {"engine": engine})
+def create_server(host: str, port: int, engine: Engine, gateway: Gateway) -> ThreadingHTTPServer:
+    handler = type("BoundHandler", (Handler,), {"engine": engine, "gateway": gateway})
     server = ThreadingHTTPServer((host, port), handler)
     server.daemon_threads = True
     return server
@@ -216,7 +258,15 @@ def main(argv: list[str] | None = None) -> int:
         loaded = engine.load_all()
         sys.stderr.write(f"preloaded: {', '.join(loaded)}\n")
 
-    server = create_server(args.host, args.port, engine)
+    config = load_provider_config()
+    gateway = build_gateway(engine, config)
+    online = any(name != "argos-local" for name in (provider.name for provider in gateway.providers))
+    if online:
+        print("  online layer: glm-4-flash enabled (set LB_OFFLINE=1 to force offline)", flush=True)
+    else:
+        print("  online layer: disabled (no key / LB_OFFLINE=1), local engine only", flush=True)
+
+    server = create_server(args.host, args.port, engine, gateway)
     print(f"LinguaBridge engine {VERSION} listening on http://{args.host}:{args.port}", flush=True)
     print(f"  models: {', '.join(f'{s}->{t}' for s, t in pairs)}", flush=True)
     print(f"  health: http://{args.host}:{args.port}/health", flush=True)
